@@ -648,6 +648,10 @@
           <div id="allergyWarningBanner" class="hidden p-3 rounded-xl bg-rose-600 text-white text-xs font-semibold flex items-center justify-between">
             <span id="allergyWarningText">Allergy conflict detected!</span>
           </div>
+          <div id="doctorStockAlertBanner" class="hidden p-3 rounded-xl bg-amber-950/90 border border-amber-600 text-amber-200 text-xs font-semibold flex items-center justify-between gap-2">
+            <span id="doctorStockAlertText">⚠️ Low Pharmacy Stock Alert!</span>
+            <button id="dismissDocStockAlertBtn" type="button" onclick="document.getElementById('doctorStockAlertBanner').classList.add('hidden')" class="text-amber-300 hover:text-white font-bold">✕</button>
+          </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
@@ -671,7 +675,7 @@
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-12 gap-2">
               <div class="sm:col-span-5">
-                <select id="medSelectDropdown" class="w-full rounded-xl border border-slate-800 px-2.5 py-2 text-xs bg-white"></select>
+                <select id="medSelectDropdown" onchange="checkSelectedMedicineStockWarning()" class="w-full rounded-xl border border-slate-800 px-2.5 py-2 text-xs bg-white"></select>
               </div>
               <div class="sm:col-span-3">
                 <select id="medDosageDropdown" class="w-full rounded-xl border border-slate-800 px-2.5 py-2 text-xs bg-white">
@@ -729,6 +733,63 @@
         </div>
 
         <div id="pharmacyDispatchList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+      </div>
+
+      <!-- In-Pharmacy Medicine Stock, Price, Power & Low-Stock Reminder Manager (Inside Pharmacy Section Only) -->
+      <div class="bg-slate-900/95 rounded-2xl shadow-lg border border-slate-800 p-5 space-y-5">
+        <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
+          <div>
+            <h3 class="text-base font-bold text-slate-100">Pharmacy Medicine Stock, Price & Low-Stock Reminder</h3>
+            <p class="text-xs text-slate-400">Add new medicines (Name, Power, Price, Stock, Reminder Limit) or update stock inline. Auto-deducts when prescribed & warns the Doctor when stock hits ≤ Reminder Limit (default 10).</p>
+          </div>
+          <div id="pharmacyLowStockSummaryBadge" class="text-xs font-bold px-3 py-1 rounded-xl bg-slate-950 border border-slate-800 text-teal-300">
+            Checking stock...
+          </div>
+        </div>
+
+        <!-- Low-Stock Danger Alert Strip inside Pharmacy -->
+        <div id="pharmacyLowStockAlertStrip" class="hidden p-3.5 rounded-xl bg-rose-950/70 border border-rose-800 text-xs text-rose-200 space-y-1"></div>
+
+        <!-- Add New Medicine Form (Name, Power, Price, Stock Available, Custom Reminder Threshold) -->
+        <form id="addNewMedicineForm" onsubmit="submitNewPharmacyMedicine(event)" class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
+          <div class="text-xs font-bold uppercase tracking-wider text-teal-400">Add New Medicine to Clinic Formulary & Pharmacy Stock</div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2.5 text-xs">
+            <div class="lg:col-span-2">
+              <label for="newMedNameInput" class="block font-semibold text-slate-300 mb-1">Medicine Name (& Salt) *</label>
+              <input id="newMedNameInput" type="text" required placeholder="e.g. Dolo / Paracetamol Tab" class="w-full rounded-xl border border-slate-800 px-3 py-2 text-xs" />
+            </div>
+            <div>
+              <label for="newMedPowerInput" class="block font-semibold text-slate-300 mb-1">Power / Strength *</label>
+              <input id="newMedPowerInput" type="text" required placeholder="e.g. 650mg / 500mg" class="w-full rounded-xl border border-slate-800 px-3 py-2 text-xs" />
+            </div>
+            <div>
+              <label for="newMedPriceInput" class="block font-semibold text-slate-300 mb-1">Unit Price *</label>
+              <input id="newMedPriceInput" type="number" min="1" required placeholder="35" class="w-full rounded-xl border border-slate-800 px-3 py-2 text-xs font-mono" />
+            </div>
+            <div>
+              <label for="newMedStockInput" class="block font-semibold text-slate-300 mb-1">Stock Available *</label>
+              <input id="newMedStockInput" type="number" min="0" required value="50" class="w-full rounded-xl border border-slate-800 px-3 py-2 text-xs font-mono" />
+            </div>
+            <div>
+              <label for="newMedMinAlertInput" class="block font-semibold text-slate-300 mb-1">Alert Reminder At ≤</label>
+              <div class="flex gap-1.5">
+                <input id="newMedMinAlertInput" type="number" min="1" required value="10" class="w-full rounded-xl border border-slate-800 px-2.5 py-2 text-xs font-mono" title="Doctor & Pharmacy danger alert triggers when stock hits or drops below this number" />
+                <button id="saveNewMedBtn" type="submit" class="px-3.5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs shrink-0 shadow transition">
+                  + Add
+                </button>
+              </div>
+            </div>
+          </div>
+        </form>
+
+        <!-- Search & Live Editable Pharmacy Stock Table -->
+        <div class="space-y-2.5">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <input id="pharmacyStockSearchInput" type="text" placeholder="🔍 Filter pharmacy stock by medicine name or power..." oninput="renderPharmacyInventory()" class="rounded-xl border border-slate-800 px-3 py-1.5 text-xs w-full sm:w-80" />
+            <span class="text-[11px] text-slate-400">Edit Stock, Price, Power, or Reminder Limit directly in the table below:</span>
+          </div>
+          <div id="pharmacyStockTableContainer" class="border border-slate-800 rounded-xl overflow-x-auto"></div>
+        </div>
       </div>
     </section>
 
@@ -1098,7 +1159,16 @@
         <div class="space-y-2">
           <label class="block font-semibold text-slate-200">Cross-Device Cloud Database URL (Firebase Realtime DB / REST JSON Endpoint)</label>
           <input id="cloudEndpointInput" type="url" placeholder="https://your-clinic-db.firebaseio.com" class="w-full rounded-xl border border-slate-800 px-3 py-2 text-xs font-mono" />
-          <p class="text-[11px] text-slate-400">Paste any free Firebase Realtime Database URL (e.g. <code class="text-teal-300">https://my-clinic-default-rtdb.firebaseio.com</code>) and a Clinic Room Key below so separate devices (Reception PC + Doctor iPad + Pharmacy Tablet) sync every 4 seconds.</p>
+          <p class="text-[11px] text-slate-400">Paste your <strong>5 TB Google Drive Apps Script Web App URL</strong> (<code class="text-teal-300">https://script.google.com/macros/s/.../exec</code>) or a Firebase Realtime DB URL below so all clinic computers sync and back up directly to your cloud storage.</p>
+          <details class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-[11px] text-slate-300">
+            <summary class="cursor-pointer font-bold text-teal-300">📂 How to Use Your 5 TB Google Drive as Your Free Cloud Server (Click to View)</summary>
+            <div class="mt-2 space-y-1.5 text-slate-400">
+              <p>1. Open your 5 TB Google Drive → Click <strong>New → More → Google Apps Script</strong>.</p>
+              <p>2. Paste the 15-line bridge script below, click <strong>Deploy → New deployment → Web app</strong> (Execute as: <em>Me</em>, Who has access: <em>Anyone</em>), and paste the generated URL above:</p>
+              <pre class="p-2 rounded bg-slate-900 text-teal-300 font-mono text-[10px] overflow-x-auto">function doGet(e){var f=DriveApp.getRootFolder().getFilesByName("zeroline_db.json");return ContentService.createTextOutput(f.hasNext()?f.next().getBlob().getDataAsString():"{}").setMimeType(ContentService.MimeType.JSON);}
+function doPost(e){var f=DriveApp.getRootFolder().getFilesByName("zeroline_db.json");if(f.hasNext()){f.next().setContent(e.postData.contents);}else{DriveApp.getRootFolder().createFile("zeroline_db.json",e.postData.contents);}return ContentService.createTextOutput('{"ok":true}').setMimeType(ContentService.MimeType.JSON);}</pre>
+            </div>
+          </details>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
@@ -1251,22 +1321,29 @@
     })();
 
     // --- Standardized Medicine Formulary (Error-Free Dropdown) ---
-    const FORMULARY = [
-      { id: "MED-01", name: "Paracetamol 650mg Tab", activeClass: "Acetaminophen / Fever", unitPrice: 30 },
-      { id: "MED-02", name: "Amoxicillin + Clavulanate 625mg Tab", activeClass: "Penicillin Antibiotic", unitPrice: 180 },
-      { id: "MED-03", name: "Azithromycin 500mg Tab", activeClass: "Macrolide Antibiotic", unitPrice: 120 },
-      { id: "MED-04", name: "Cetirizine 10mg Tab", activeClass: "Antihistamine / Allergy", unitPrice: 25 },
-      { id: "MED-05", name: "Pantoprazole 40mg Tab", activeClass: "PPI / Acidity", unitPrice: 65 },
-      { id: "MED-06", name: "Metformin 500mg SR Tab", activeClass: "Biguanide / Diabetes", unitPrice: 55 },
-      { id: "MED-07", name: "Ibuprofen 400mg Tab", activeClass: "NSAID / Painkiller", unitPrice: 40 },
-      { id: "MED-08", name: "Cotrimoxazole DS Tab", activeClass: "Sulfa Antibiotic", unitPrice: 45 },
-      { id: "MED-09", name: "Montelukast + Levocetirizine Tab", activeClass: "Asthma / Cold Allergy", unitPrice: 110 },
-      { id: "MED-10", name: "Amlodipine 5mg Tab", activeClass: "CCB / Blood Pressure", unitPrice: 45 },
-      { id: "MED-11", name: "Atorvastatin 10mg Tab", activeClass: "Statin / Cholesterol", unitPrice: 90 },
-      { id: "MED-12", name: "Dextromethorphan Cough Syrup 100ml", activeClass: "Antitussive / Dry Cough", unitPrice: 85 },
-      { id: "MED-13", name: "ORS Electral Sachet", activeClass: "Electrolyte / Dehydration", unitPrice: 22 },
-      { id: "MED-14", name: "Vitamin D3 60,000 IU Cap", activeClass: "Supplement / Bone", unitPrice: 130 }
+    const DEFAULT_FORMULARY = [
+      { id: "MED-01", name: "Paracetamol Tab", power: "650mg", activeClass: "Acetaminophen / Fever", unitPrice: 30, stock: 45, minStock: 10 },
+      { id: "MED-02", name: "Amoxicillin + Clavulanate Tab", power: "625mg", activeClass: "Penicillin Antibiotic", unitPrice: 180, stock: 28, minStock: 10 },
+      { id: "MED-03", name: "Azithromycin Tab", power: "500mg", activeClass: "Macrolide Antibiotic", unitPrice: 120, stock: 10, minStock: 10 },
+      { id: "MED-04", name: "Cetirizine Tab", power: "10mg", activeClass: "Antihistamine / Allergy", unitPrice: 25, stock: 60, minStock: 10 },
+      { id: "MED-05", name: "Pantoprazole Tab", power: "40mg", activeClass: "PPI / Acidity", unitPrice: 65, stock: 40, minStock: 10 },
+      { id: "MED-06", name: "Metformin SR Tab", power: "500mg", activeClass: "Biguanide / Diabetes", unitPrice: 55, stock: 35, minStock: 10 },
+      { id: "MED-07", name: "Ibuprofen Tab", power: "400mg", activeClass: "NSAID / Painkiller", unitPrice: 40, stock: 25, minStock: 10 },
+      { id: "MED-08", name: "Cotrimoxazole DS Tab", power: "800/160mg", activeClass: "Sulfa Antibiotic", unitPrice: 45, stock: 18, minStock: 10 },
+      { id: "MED-09", name: "Montelukast + Levocetirizine Tab", power: "10mg/5mg", activeClass: "Asthma / Cold Allergy", unitPrice: 110, stock: 8, minStock: 10 },
+      { id: "MED-10", name: "Amlodipine Tab", power: "5mg", activeClass: "CCB / Blood Pressure", unitPrice: 45, stock: 50, minStock: 10 },
+      { id: "MED-11", name: "Atorvastatin Tab", power: "10mg", activeClass: "Statin / Cholesterol", unitPrice: 90, stock: 30, minStock: 10 },
+      { id: "MED-12", name: "Dextromethorphan Cough Syrup", power: "100ml", activeClass: "Antitussive / Dry Cough", unitPrice: 85, stock: 14, minStock: 10 },
+      { id: "MED-13", name: "ORS Electral Sachet", power: "21.8g", activeClass: "Electrolyte / Dehydration", unitPrice: 22, stock: 75, minStock: 15 },
+      { id: "MED-14", name: "Vitamin D3 Cholecalciferol Cap", power: "60,000 IU", activeClass: "Supplement / Bone", unitPrice: 130, stock: 22, minStock: 10 }
     ];
+
+    function getFormulary() {
+      if (!state.formulary || !Array.isArray(state.formulary) || state.formulary.length === 0) {
+        state.formulary = JSON.parse(JSON.stringify(DEFAULT_FORMULARY));
+      }
+      return state.formulary;
+    }
 
     // --- Initial Seed Cloud Database (Patients + Live Queue) ---
     const DEFAULT_STATE = {
@@ -1752,13 +1829,14 @@ ${statusAdvice}`;
     async function pushToRemoteCloud() {
       const url = getRemoteCloudUrl();
       if (!url) return;
+      const isGDriveScript = url.includes("script.google.com");
       try {
         await fetch(url, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          method: isGDriveScript ? "POST" : "PUT",
+          headers: { "Content-Type": isGDriveScript ? "text/plain;charset=utf-8" : "application/json" },
           body: JSON.stringify(state)
         });
-        document.getElementById("licenseBadge").textContent = "Live Cloud DB Synced";
+        document.getElementById("licenseBadge").textContent = isGDriveScript ? "5TB Google Drive Synced" : "Live Cloud DB Synced";
       } catch (err) {
         // Silent fallback when offline
       }
@@ -1859,33 +1937,71 @@ ${statusAdvice}`;
       showToast(`Token ${nextWaiting.token} sent to Doctor's Tablet.`);
     }
 
-    // --- Doctor Tablet Logic ---
+    // --- Doctor Tablet Logic (Search Bar + Low-Stock Danger Alert at <= minStock + Auto Stock Deduction) ---
     function populateFormularyDropdown(filterQuery) {
       const sel = document.getElementById("medSelectDropdown");
       const badge = document.getElementById("medSearchCountBadge");
-      const cur = state.saasConfig.currency;
-      const q = (filterQuery || "").trim().toLowerCase();
-      const filtered = FORMULARY.filter((m) => {
+      if (!sel) return;
+      const cur = (state.saasConfig && state.saasConfig.currency) || "₹";
+      const list = getFormulary();
+      const q = (filterQuery !== undefined ? filterQuery : (document.getElementById("medSearchInput") ? document.getElementById("medSearchInput").value : "")).trim().toLowerCase();
+
+      const filtered = list.filter((m) => {
         if (!q) return true;
-        return m.name.toLowerCase().includes(q) || m.activeClass.toLowerCase().includes(q) || m.id.toLowerCase().includes(q);
+        return (
+          m.name.toLowerCase().includes(q) ||
+          (m.power || "").toLowerCase().includes(q) ||
+          (m.activeClass || "").toLowerCase().includes(q) ||
+          m.id.toLowerCase().includes(q)
+        );
       });
 
       if (badge) {
-        badge.textContent = q ? `${filtered.length} match(es) found` : `All ${FORMULARY.length} medicines shown`;
+        badge.textContent = q ? `${filtered.length} match(es) found` : `All ${list.length} medicines searchable`;
       }
 
       if (filtered.length === 0) {
-        sel.innerHTML = `<option value="">No matching medicine found for "${escapeHtml(filterQuery)}"</option>`;
+        sel.innerHTML = `<option value="">No matching medicine found for "${escapeHtml(q)}"</option>`;
         return;
       }
 
-      sel.innerHTML = filtered.map(
-        (m) => `<option value="${m.id}">${m.name} [${m.activeClass}] — ${cur}${m.unitPrice}</option>`
-      ).join("");
+      const prevVal = sel.value;
+      sel.innerHTML = filtered.map((m) => {
+        const minLim = m.minStock !== undefined ? m.minStock : 10;
+        const isDanger = m.stock <= minLim;
+        const stockTag = isDanger
+          ? `⚠️ LOW STOCK: ${m.stock} left (Min ${minLim})`
+          : `Stock: ${m.stock}`;
+        return `<option value="${m.id}">${escapeHtml(m.name)} (${escapeHtml(m.power || "")}) — ${cur}${m.unitPrice} [${stockTag}]</option>`;
+      }).join("");
+
+      if (prevVal && filtered.some((m) => m.id === prevVal)) {
+        sel.value = prevVal;
+      }
+      checkSelectedMedicineStockWarning();
     }
 
     function filterFormularyDropdown(query) {
       populateFormularyDropdown(query);
+    }
+
+    function checkSelectedMedicineStockWarning() {
+      const sel = document.getElementById("medSelectDropdown");
+      const banner = document.getElementById("doctorStockAlertBanner");
+      const text = document.getElementById("doctorStockAlertText");
+      if (!sel || !banner || !text) return;
+      const medObj = getFormulary().find((m) => m.id === sel.value);
+      if (!medObj) {
+        banner.classList.add("hidden");
+        return;
+      }
+      const minLim = medObj.minStock !== undefined ? medObj.minStock : 10;
+      if (medObj.stock <= minLim) {
+        banner.classList.remove("hidden");
+        text.textContent = `🚨 DANGER / MINIMUM STOCK ALERT: "${medObj.name} (${medObj.power || ""})" has only ${medObj.stock} unit(s) left in Pharmacy (Reminder threshold: ≤ ${minLim}). Consider an alternative or notify Pharmacy to restock!`;
+      } else {
+        banner.classList.add("hidden");
+      }
     }
 
     function selectDoctorPatient(tokenStr) {
@@ -1911,13 +2027,14 @@ ${statusAdvice}`;
       }
       const patient = state.patients[item.cloudId];
       const medId = document.getElementById("medSelectDropdown").value;
-      const medObj = FORMULARY.find((m) => m.id === medId);
+      const medObj = getFormulary().find((m) => m.id === medId);
       if (!medObj) {
         showToast("Select a valid medicine from the search results first.");
         return;
       }
       const dosage = document.getElementById("medDosageDropdown").value;
       const days = parseInt(document.getElementById("medDaysInput").value, 10) || 5;
+      const unitsNeeded = Math.max(1, Math.ceil(days / 5));
 
       // Allergy guard check against Cloud EHR
       const allergyStr = (patient.allergies || "").toLowerCase();
@@ -1925,28 +2042,61 @@ ${statusAdvice}`;
       if (
         allergyStr &&
         allergyStr !== "none" &&
-        (allergyStr.includes(medObj.activeClass.toLowerCase()) ||
+        ((medObj.activeClass || "").toLowerCase().includes(allergyStr) ||
+          allergyStr.includes((medObj.activeClass || "").toLowerCase().split(" ")[0]) ||
           medObj.name.toLowerCase().includes(allergyStr))
       ) {
         banner.classList.remove("hidden");
         document.getElementById("allergyWarningText").textContent =
-          `⚠️ CLOUD EHR ALLERGY BLOCK: ${patient.name} (${patient.cloudId}) has a recorded allergy to "${patient.allergies}". ${medObj.name} (${medObj.activeClass}) was blocked for patient safety.`;
+          `⚠️ CLOUD EHR ALLERGY BLOCK: ${patient.name} (${patient.cloudId}) has a recorded allergy to "${patient.allergies}". ${medObj.name} (${medObj.power || ""}) was blocked for patient safety.`;
         return;
       }
       banner.classList.add("hidden");
 
+      // Automatically deduct stock from Pharmacy Inventory
+      medObj.stock = Math.max(0, (medObj.stock || 0) - unitsNeeded);
+      const minLim = medObj.minStock !== undefined ? medObj.minStock : 10;
+
       draftRxMedicines.push({
-        name: medObj.name,
+        medId: medObj.id,
+        name: `${medObj.name} ${medObj.power || ""}`.trim(),
         dosage,
         days,
-        price: medObj.unitPrice * Math.max(1, Math.ceil(days / 5))
+        unitsDeducted: unitsNeeded,
+        price: medObj.unitPrice * unitsNeeded
       });
+
+      saveState();
+      populateFormularyDropdown();
       renderDraftRxList();
+      renderPharmacyInventory();
+
+      if (medObj.stock <= minLim) {
+        const stockBanner = document.getElementById("doctorStockAlertBanner");
+        const stockText = document.getElementById("doctorStockAlertText");
+        if (stockBanner && stockText) {
+          stockBanner.classList.remove("hidden");
+          stockText.textContent = `🚨 DANGER STOCK ALERT: "${medObj.name} (${medObj.power || ""})" dropped to ${medObj.stock} unit(s) (Minimum threshold: ≤ ${minLim}). You can switch to another medication if needed!`;
+        }
+        showToast(`⚠️ Low Stock Warning: ${medObj.name} now has ${medObj.stock} unit(s) left (≤ ${minLim})!`);
+      } else {
+        showToast(`Added ${medObj.name} (${medObj.power || ""}) — Auto-deducted ${unitsNeeded} pack(s). Stock remaining: ${medObj.stock}`);
+      }
     }
 
     function removeDraftMedicine(idx) {
+      const removed = draftRxMedicines[idx];
+      if (removed && removed.medId) {
+        const medObj = getFormulary().find((m) => m.id === removed.medId);
+        if (medObj) {
+          medObj.stock = (medObj.stock || 0) + (removed.unitsDeducted || 1);
+        }
+      }
       draftRxMedicines.splice(idx, 1);
+      saveState();
+      populateFormularyDropdown();
       renderDraftRxList();
+      renderPharmacyInventory();
     }
 
     function renderDraftRxList() {
@@ -1959,7 +2109,7 @@ ${statusAdvice}`;
       document.getElementById("rxTotalPreview").textContent = `${cur}${grandTotal}`;
 
       if (draftRxMedicines.length === 0) {
-        container.innerHTML = `<div class="p-4 text-center text-xs text-slate-500">No medicines added yet. Use the dropdown above to add error-free digital prescriptions.</div>`;
+        container.innerHTML = `<div class="p-4 text-center text-xs text-slate-500">No medicines added yet. Use the search bar and dropdown above to add error-free digital prescriptions.</div>`;
         return;
       }
 
@@ -1967,7 +2117,7 @@ ${statusAdvice}`;
         <table class="w-full text-left border-collapse text-xs">
           <thead>
             <tr class="bg-slate-950 text-slate-300 border-b border-slate-800">
-              <th class="py-2 px-3">Medicine</th>
+              <th class="py-2 px-3">Medicine & Power</th>
               <th class="py-2 px-3">Dosage</th>
               <th class="py-2 px-3">Duration</th>
               <th class="py-2 px-3">Cost</th>
@@ -1982,7 +2132,7 @@ ${statusAdvice}`;
                 <td class="py-2 px-3 text-slate-300">${m.days} days</td>
                 <td class="py-2 px-3 font-mono text-slate-100">${cur}${m.price}</td>
                 <td class="py-2 px-3 text-right">
-                  <button type="button" onclick="removeDraftMedicine(${idx})" class="text-rose-600 hover:underline font-semibold">Remove</button>
+                  <button type="button" onclick="removeDraftMedicine(${idx})" class="text-rose-400 hover:underline font-semibold">Remove (+Restore Stock)</button>
                 </td>
               </tr>
             `).join("")}
@@ -2873,6 +3023,167 @@ ${statusAdvice}`;
       }).join("");
     }
 
+
+    // --- In-Pharmacy Stock, Price, Power & Custom Low-Stock Reminder Management ---
+    function submitNewPharmacyMedicine(e) {
+      e.preventDefault();
+      const name = document.getElementById("newMedNameInput").value.trim();
+      const power = document.getElementById("newMedPowerInput").value.trim();
+      const unitPrice = parseInt(document.getElementById("newMedPriceInput").value, 10) || 30;
+      const stock = parseInt(document.getElementById("newMedStockInput").value, 10) || 0;
+      const minStock = parseInt(document.getElementById("newMedMinAlertInput").value, 10) || 10;
+
+      const list = getFormulary();
+      const nextNum = list.length + 1;
+      const newId = "MED-" + String(nextNum).padStart(2, "0") + "-" + Math.floor(Math.random() * 90 + 10);
+
+      list.unshift({
+        id: newId,
+        name,
+        power,
+        activeClass: "Clinic Formulary",
+        unitPrice,
+        stock,
+        minStock
+      });
+
+      saveState();
+      document.getElementById("addNewMedicineForm").reset();
+      document.getElementById("newMedStockInput").value = "50";
+      document.getElementById("newMedMinAlertInput").value = "10";
+      populateFormularyDropdown();
+      renderPharmacyInventory();
+      showToast(`Added "${name} (${power})" to Pharmacy Stock & Doctor's Search Bar!`);
+    }
+
+    function updateMedicineField(medId, field, rawVal) {
+      const med = getFormulary().find((m) => m.id === medId);
+      if (!med) return;
+      if (field === "stock" || field === "unitPrice" || field === "minStock") {
+        med[field] = Math.max(0, parseInt(rawVal, 10) || 0);
+      } else {
+        med[field] = String(rawVal || "").trim();
+      }
+      saveState();
+      populateFormularyDropdown();
+      renderPharmacyInventory();
+    }
+
+    function adjustMedicineStock(medId, delta) {
+      const med = getFormulary().find((m) => m.id === medId);
+      if (!med) return;
+      med.stock = Math.max(0, (med.stock || 0) + delta);
+      saveState();
+      populateFormularyDropdown();
+      renderPharmacyInventory();
+      const minLim = med.minStock !== undefined ? med.minStock : 10;
+      if (med.stock <= minLim) {
+        showToast(`🚨 Low Stock Alert: ${med.name} (${med.power || ""}) is at ${med.stock} units (Reminder ≤ ${minLim})!`);
+      } else {
+        showToast(`Updated ${med.name} stock to ${med.stock} units.`);
+      }
+    }
+
+    function renderPharmacyInventory() {
+      const container = document.getElementById("pharmacyStockTableContainer");
+      const strip = document.getElementById("pharmacyLowStockAlertStrip");
+      const summaryBadge = document.getElementById("pharmacyLowStockSummaryBadge");
+      if (!container) return;
+
+      const cur = (state.saasConfig && state.saasConfig.currency) || "₹";
+      const list = getFormulary();
+      const q = (document.getElementById("pharmacyStockSearchInput") ? document.getElementById("pharmacyStockSearchInput").value : "").trim().toLowerCase();
+
+      const lowStockItems = list.filter((m) => m.stock <= (m.minStock !== undefined ? m.minStock : 10));
+
+      if (summaryBadge) {
+        if (lowStockItems.length > 0) {
+          summaryBadge.className = "text-xs font-bold px-3 py-1 rounded-xl bg-rose-950 border border-rose-700 text-rose-300";
+          summaryBadge.textContent = `🚨 ${lowStockItems.length} Medicine(s) at/below Minimum Stock Reminder!`;
+        } else {
+          summaryBadge.className = "text-xs font-bold px-3 py-1 rounded-xl bg-emerald-950 border border-emerald-800 text-emerald-300";
+          summaryBadge.textContent = `✓ All ${list.length} Medicines Above Minimum Stock`;
+        }
+      }
+
+      if (strip) {
+        if (lowStockItems.length > 0) {
+          strip.classList.remove("hidden");
+          strip.innerHTML = `
+            <div class="font-bold text-rose-300 uppercase tracking-wider">🚨 Stock Reminder & Danger Alert (Stock ≤ Minimum Reminder Limit):</div>
+            <div class="flex flex-wrap gap-2 pt-1">
+              ${lowStockItems.map((m) => `
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-950 border border-rose-700 text-rose-200 font-medium">
+                  <strong>${escapeHtml(m.name)} (${escapeHtml(m.power || "")})</strong>:
+                  <span class="font-mono font-bold text-rose-400">${m.stock} left</span>
+                  <span class="text-[10px] text-slate-400">(Alert ≤ ${m.minStock !== undefined ? m.minStock : 10})</span>
+                  <button type="button" onclick="adjustMedicineStock('${m.id}', 25)" class="ml-1 px-1.5 py-0.5 rounded bg-teal-600 hover:bg-teal-500 text-white text-[10px] font-bold">+25 Restock</button>
+                </span>
+              `).join("")}
+            </div>
+          `;
+        } else {
+          strip.classList.add("hidden");
+        }
+      }
+
+      const filtered = list.filter((m) => {
+        if (!q) return true;
+        return m.name.toLowerCase().includes(q) || (m.power || "").toLowerCase().includes(q) || m.id.toLowerCase().includes(q);
+      });
+
+      container.innerHTML = `
+        <table class="w-full text-left border-collapse text-xs">
+          <thead>
+            <tr class="bg-slate-950 text-slate-300 border-b border-slate-800">
+              <th class="py-2.5 px-3">Medicine Name</th>
+              <th class="py-2.5 px-3">Power</th>
+              <th class="py-2.5 px-3">Price (${cur})</th>
+              <th class="py-2.5 px-3">Available Stock</th>
+              <th class="py-2.5 px-3">Reminder Alert At ≤</th>
+              <th class="py-2.5 px-3">Status</th>
+              <th class="py-2.5 px-3 text-right">Quick Restock</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${filtered.map((m) => {
+              const minLim = m.minStock !== undefined ? m.minStock : 10;
+              const isLow = m.stock <= minLim;
+              return `
+                <tr class="border-b border-slate-800/80 ${isLow ? 'bg-rose-950/30' : ''}">
+                  <td class="py-2 px-3 font-semibold text-slate-100">
+                    ${escapeHtml(m.name)}
+                    <div class="text-[10px] text-slate-400 font-normal">${escapeHtml(m.activeClass || "")}</div>
+                  </td>
+                  <td class="py-2 px-3">
+                    <input type="text" value="${escapeHtml(m.power || "")}" onchange="updateMedicineField('${m.id}', 'power', this.value)" class="w-24 rounded-lg border border-slate-800 px-2 py-1 text-xs font-mono" />
+                  </td>
+                  <td class="py-2 px-3">
+                    <input type="number" min="1" value="${m.unitPrice}" onchange="updateMedicineField('${m.id}', 'unitPrice', this.value)" class="w-20 rounded-lg border border-slate-800 px-2 py-1 text-xs font-mono" />
+                  </td>
+                  <td class="py-2 px-3">
+                    <input type="number" min="0" value="${m.stock}" onchange="updateMedicineField('${m.id}', 'stock', this.value)" class="w-20 rounded-lg border border-slate-800 px-2 py-1 text-xs font-mono font-bold" />
+                  </td>
+                  <td class="py-2 px-3">
+                    <input type="number" min="1" value="${minLim}" onchange="updateMedicineField('${m.id}', 'minStock', this.value)" class="w-20 rounded-lg border border-slate-800 px-2 py-1 text-xs font-mono" title="Customize minimum stock reminder for this medicine" />
+                  </td>
+                  <td class="py-2 px-3">
+                    <span class="px-2 py-0.5 rounded-full text-[11px] font-bold ${isLow ? 'bg-rose-950 text-rose-300 border border-rose-700' : 'bg-emerald-950 text-emerald-300 border border-emerald-800'}">
+                      ${isLow ? `🚨 LOW (≤ ${minLim})` : '✓ IN STOCK'}
+                    </span>
+                  </td>
+                  <td class="py-2 px-3 text-right space-x-1">
+                    <button type="button" onclick="adjustMedicineStock('${m.id}', 10)" class="px-2 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-teal-300 border border-slate-700 font-bold text-[11px]">+10</button>
+                    <button type="button" onclick="adjustMedicineStock('${m.id}', 50)" class="px-2 py-1 rounded-lg bg-teal-600 hover:bg-teal-500 text-white font-bold text-[11px]">+50</button>
+                  </td>
+                </tr>
+              `;
+            }).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
     function renderPharmacyView() {
       const container = document.getElementById("pharmacyDispatchList");
       const cur = state.saasConfig.currency;
@@ -3056,8 +3367,10 @@ ${statusAdvice}`;
       renderGoogleAccountBadge();
       renderFrontDeskQueue();
       renderFrontDeskBilling();
+      populateFormularyDropdown();
       renderDoctorView();
       renderPharmacyView();
+      renderPharmacyInventory();
       renderCloudDirectory();
       renderSaasView();
       renderSavedInquiries();
