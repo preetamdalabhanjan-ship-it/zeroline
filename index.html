@@ -4,6 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#090d16" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/png" href="icon-192.png" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Zero-Line" />
   <title>Zero-Line Clinic Hub — Cloud EHR, Live Token & Pharmacy System</title>
   <meta name="description" content="Eliminate crowded clinic waiting rooms, paper record chaos, and prescription errors with Zero-Line Clinic Hub: Cloud Patient IDs, WhatsApp Tokens & 1-Stop Pharmacy." />
   <meta name="keywords" content="Clinic Management Software, Cloud EHR, Live WhatsApp Token Queue, Digital Prescription Software, Pharmacy Billing POS" />
@@ -1508,30 +1514,11 @@ function doPost(e){var f=DriveApp.getRootFolder().getFilesByName("zeroline_db.js
       deferredInstallPrompt = e;
     });
 
-    (function injectPwaManifest() {
-      try {
-        const manifest = {
-          name: "Zero-Line Clinic Hub",
-          short_name: "ZeroLineHub",
-          start_url: ".",
-          display: "standalone",
-          background_color: "#000000",
-          theme_color: "#000000",
-          icons: [{
-            src: "data:image/svg+xml;base64," + btoa('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="22" fill="#0f766e"/><text x="50" y="64" font-family="Arial" font-size="44" font-weight="bold" fill="#ffffff" text-anchor="middle">ZL</text></svg>'),
-            sizes: "192x192",
-            type: "image/svg+xml"
-          }]
-        };
-        const blob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
-        const link = document.createElement('link');
-        link.rel = 'manifest';
-        link.href = URL.createObjectURL(blob);
-        document.head.appendChild(link);
-      } catch (err) {
-        // Ignore in restricted sandboxed environments
-      }
-    })();
+    // Real service worker (required for install). Needs https:// or localhost, not file://
+    if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+      window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+    }
+    window.addEventListener('appinstalled', () => { deferredInstallPrompt = null; });
 
     // --- Standardized Medicine Formulary (Error-Free Dropdown) ---
     const DEFAULT_FORMULARY = [
@@ -3764,11 +3751,15 @@ function doPost(e){var f=DriveApp.getRootFolder().getFilesByName("zeroline_db.js
       document.getElementById("installModal").classList.add("hidden");
     }
 
-    function triggerNativePwaInstall() {
+    async function triggerNativePwaInstall() {
       if (deferredInstallPrompt) {
         deferredInstallPrompt.prompt();
+        try { await deferredInstallPrompt.userChoice; } catch (e) {}
+        deferredInstallPrompt = null;
+      } else if (/iphone|ipad|ipod/i.test(navigator.userAgent)) {
+        showToast("iPhone/iPad: tap Share, then 'Add to Home Screen'.");
       } else {
-        showToast("Use your browser's address bar 'Install App' or 'Add to Home Screen' menu to install natively.");
+        showToast("Open the browser menu and tap 'Install app' / 'Add to Home Screen'. (Must be opened from the https link.)");
       }
       closeInstallModal();
     }
