@@ -19,6 +19,14 @@
     input::placeholder, textarea::placeholder { color: #64748b !important; }
     input:focus, select:focus, textarea:focus { border-color: #14b8a6 !important; outline: none !important; box-shadow: 0 0 0 2px rgba(20, 184, 166, 0.2) !important; }
     h1, h2, h3 { text-wrap: balance; }
+    /* Clean Daylight White Theme when body.light-theme is active */
+    body.light-theme { background-color: #f8fafc !important; color: #0f172a !important; }
+    body.light-theme header, body.light-theme footer, body.light-theme #publicStorefrontGate { background-color: #ffffff !important; color: #0f172a !important; border-color: #e2e8f0 !important; }
+    body.light-theme [class*="bg-slate-900"], body.light-theme [class*="bg-slate-950"] { background-color: #ffffff !important; color: #0f172a !important; border-color: #cbd5e1 !important; }
+    body.light-theme [class*="bg-slate-800"] { background-color: #f1f5f9 !important; color: #0f172a !important; border-color: #cbd5e1 !important; }
+    body.light-theme [class*="text-slate-100"], body.light-theme [class*="text-slate-200"], body.light-theme [class*="text-slate-300"] { color: #1e293b !important; }
+    body.light-theme [class*="text-slate-400"] { color: #475569 !important; }
+    body.light-theme input, body.light-theme select, body.light-theme textarea { background-color: #ffffff !important; color: #0f172a !important; border-color: #cbd5e1 !important; }
     @media print {
       .no-print { display: none !important; }
       .print-only { display: block !important; }
@@ -31,7 +39,10 @@
   <!-- Top Navigation & SaaS Tenant Bar -->
   <header class="bg-[#090d16] text-slate-100 border-b border-slate-800 shadow-md no-print">
     <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2.5">
+        <button id="topLeftSettingsGearBtn" type="button" onclick="openMasterSettingsModal()" aria-label="Open Clinic Settings, Theme, Cloud Sync & Vendor Admin" title="Settings (Appearance, Cloud Sync, Directory & Google Authenticator Admin)" class="w-10 h-10 rounded-xl bg-slate-900 hover:bg-slate-800 text-teal-400 border border-slate-700 flex items-center justify-center text-lg shadow-sm transition">
+          ⚙️
+        </button>
         <a id="brandLogoHomeLink" href="#top" onclick="switchTab('frontdesk', true); return false;" aria-label="Return to Zero-Line Clinic Hub Home" class="w-10 h-10 rounded-xl bg-teal-600 hover:bg-teal-500 text-white flex items-center justify-center font-bold text-lg shadow-sm transition">ZL</a>
         <div>
           <div class="flex items-center gap-2">
@@ -53,15 +64,9 @@
         <button id="tabBtn-pharmacy" onclick="switchTab('pharmacy')" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-teal-200 hover:text-white transition">
           3. Pharmacy & 1-Stop Exit
         </button>
-        <button id="tabBtn-cloud" onclick="switchTab('cloud')" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-teal-200 hover:text-white transition">
-          Cloud ID Directory
-        </button>
-        <button id="tabBtn-saas" onclick="switchTab('saas')" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-teal-200 hover:text-white transition">
-          SaaS Pricing & Install
-        </button>
-        <button id="tabBtn-about" onclick="switchTab('about', true)" class="tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-teal-200 hover:text-white transition">
-          About, Services & Contact
-        </button>
+        <button id="tabBtn-cloud" onclick="switchTab('cloud')" class="hidden">Cloud ID Directory</button>
+        <button id="tabBtn-saas" onclick="switchTab('saas')" class="hidden">SaaS Pricing & Install</button>
+        <button id="tabBtn-about" onclick="switchTab('about', true)" class="hidden">About, Services & Contact</button>
       </nav>
     </div>
   </header>
@@ -100,18 +105,13 @@
           <span id="googleAvatarBadge" class="w-4 h-4 rounded-full bg-teal-600 text-[10px] font-bold flex items-center justify-center text-white">G</span>
           <span id="googleUserText">Sign in with Google</span>
         </button>
-        <button id="roleLockToggleBtn" onclick="openPinModal('manage')" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700 font-medium transition">
-          Admin / Role Lock: <span id="pinLockStateText" class="text-teal-300">Armed</span>
+        <button id="openSettingsQuickBtn" type="button" onclick="openMasterSettingsModal()" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-teal-300 border border-slate-700 font-semibold transition">
+          ⚙️ Settings & Admin (<span id="pinLockStateText">TOTP Armed</span>)
         </button>
-        <button id="cloudSyncSetupBtn" onclick="openCloudSyncModal()" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700 font-medium transition">
-          Cloud DB Sync
-        </button>
-        <button id="installPwaBtn" onclick="openInstallModal()" class="px-2.5 py-1 rounded-lg bg-slate-950 hover:bg-zinc-800 text-slate-200 border border-slate-700 font-medium transition">
-          Install App on Any OS
-        </button>
-        <button id="exportCloudBtn" onclick="exportCloudData()" class="px-2.5 py-1 rounded-lg bg-teal-950 hover:bg-teal-900 text-teal-200 font-medium border border-teal-800 transition">
-          Export Cloud Backup
-        </button>
+        <button id="roleLockToggleBtn" onclick="openPinModal('manage')" class="hidden">Admin / Role Lock: Armed</button>
+        <button id="cloudSyncSetupBtn" onclick="openCloudSyncModal()" class="hidden">Cloud DB Sync</button>
+        <button id="installPwaBtn" onclick="openInstallModal()" class="hidden">Install App on Any OS</button>
+        <button id="exportCloudBtn" onclick="exportCloudData()" class="hidden">Export Cloud Backup</button>
       </div>
     </div>
   </div>
@@ -407,6 +407,15 @@
           <p class="text-[10px] text-slate-400">Collect the subscription cash in person and enter your confidential vendor cash verification code to activate this clinic's license.</p>
         </div>
 
+        <!-- Seamless AutoPay Mandate Option (30-Day Gold / 1-Year Platinum Automatic Renewal) -->
+        <label for="checkoutAutoPayCheckbox" class="flex items-start gap-2.5 p-3 rounded-xl bg-slate-950 border border-teal-800/80 cursor-pointer">
+          <input id="checkoutAutoPayCheckbox" type="checkbox" checked class="mt-0.5 rounded border-slate-700" />
+          <span class="text-[11px] text-slate-300 leading-relaxed">
+            <strong class="text-teal-300 block">✓ Enable Seamless AutoPay Mandate (Zero Interruption)</strong>
+            I agree to automatic recurring deduction (<span id="checkoutAutoPayCycleLabel">every 30 days / 1 year</span> according to the chosen plan) so clinic operations continue without any break when the cycle renews.
+          </span>
+        </label>
+
         <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-800">
           <button id="cancelCheckoutBtn" type="button" onclick="closeOnlineCheckoutModal()" class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 font-semibold">
             Cancel
@@ -510,8 +519,11 @@
                 </select>
               </div>
               <div>
-                <label class="block text-xs font-semibold text-slate-300 mb-1">Vitals (BP / Temp)</label>
-                <input id="formVitals" type="text" placeholder="120/80, 98.6°F" class="w-full rounded-xl border border-slate-800 px-3 py-2 text-sm" />
+                <label class="block text-xs font-semibold text-slate-300 mb-1">Vitals & Weight (kg)</label>
+                <div class="grid grid-cols-2 gap-1.5">
+                  <input id="formVitals" type="text" placeholder="120/80, 98.6°F" class="w-full rounded-xl border border-slate-800 px-2 py-2 text-xs" />
+                  <input id="formWeight" type="number" min="1" max="250" step="0.5" placeholder="Wt (kg)" title="Patient Weight in kg (for pediatric/adult dosing)" class="w-full rounded-xl border border-slate-800 px-2 py-2 text-xs font-mono" />
+                </div>
               </div>
             </div>
 
@@ -561,6 +573,7 @@
               </div>
               <span class="text-xs font-semibold text-emerald-300 bg-emerald-950 px-2.5 py-1 rounded-lg border border-emerald-800">Front Desk Cashier</span>
             </div>
+            <div id="frontDeskDailySettlementBar" class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs"></div>
             <div id="frontDeskBillingList" class="space-y-3"></div>
           </div>
 
@@ -703,9 +716,39 @@
             <div id="rxDraftTableContainer" class="border border-slate-800 rounded-xl overflow-hidden"></div>
           </div>
 
-          <div>
-            <label class="block text-xs font-semibold text-slate-300 mb-1">Doctor's Advice / Follow-Up Notes</label>
-            <input id="rxNotes" type="text" placeholder="e.g. Drink warm fluids, rest for 3 days, review if fever persists." class="w-full rounded-xl border border-slate-800 px-3 py-2 text-sm" />
+          <!-- Lab Tests / Diagnostic Investigations + Next Follow-Up Date + Doctor Reg. Signature -->
+          <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <label class="text-xs font-bold uppercase tracking-wider text-teal-400">Lab Tests / Diagnostic Investigations</label>
+              <span id="selectedLabsBadge" class="text-[11px] font-mono text-slate-400">0 tests selected</span>
+            </div>
+            <div class="flex flex-wrap gap-1.5" id="labQuickChipsContainer">
+              <button type="button" onclick="toggleLabTest('CBC — Complete Blood Count')" class="lab-chip px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 text-xs font-medium">+ CBC</button>
+              <button type="button" onclick="toggleLabTest('Fasting / PP Blood Sugar')" class="lab-chip px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 text-xs font-medium">+ Blood Sugar</button>
+              <button type="button" onclick="toggleLabTest('HbA1c')" class="lab-chip px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 text-xs font-medium">+ HbA1c</button>
+              <button type="button" onclick="toggleLabTest('Lipid Profile')" class="lab-chip px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 text-xs font-medium">+ Lipid Profile</button>
+              <button type="button" onclick="toggleLabTest('Thyroid Profile — TSH/T3/T4')" class="lab-chip px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 text-xs font-medium">+ Thyroid</button>
+              <button type="button" onclick="toggleLabTest('Urine Routine')" class="lab-chip px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 text-xs font-medium">+ Urine Routine</button>
+              <button type="button" onclick="toggleLabTest('Chest X-Ray')" class="lab-chip px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 text-xs font-medium">+ Chest X-Ray</button>
+              <button type="button" onclick="toggleLabTest('12-Lead ECG')" class="lab-chip px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 text-xs font-medium">+ ECG</button>
+              <button type="button" onclick="toggleLabTest('Dengue / Malaria NS1')" class="lab-chip px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-700 text-xs font-medium">+ Dengue/Malaria</button>
+            </div>
+            <input id="rxLabTestsInput" type="text" placeholder="Selected or custom lab investigations (e.g. CBC, Chest X-Ray, LFT)..." class="w-full rounded-xl border border-slate-800 px-3 py-2 text-xs" />
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+            <div class="sm:col-span-5">
+              <label for="rxFollowUpDate" class="block text-xs font-semibold text-slate-300 mb-1">Next Follow-Up Review Date</label>
+              <div class="flex gap-1.5">
+                <input id="rxFollowUpDate" type="date" class="flex-1 rounded-xl border border-slate-800 px-2.5 py-2 text-xs font-mono" />
+                <button type="button" onclick="setQuickFollowUpDays(3)" class="px-2 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-teal-300 border border-slate-700 text-[11px] font-bold">+3d</button>
+                <button type="button" onclick="setQuickFollowUpDays(7)" class="px-2 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-teal-300 border border-slate-700 text-[11px] font-bold">+7d</button>
+              </div>
+            </div>
+            <div class="sm:col-span-7">
+              <label for="rxNotes" class="block text-xs font-semibold text-slate-300 mb-1">Doctor's Advice / Follow-Up Notes</label>
+              <input id="rxNotes" type="text" placeholder="e.g. Drink warm fluids, rest for 3 days, review with lab reports." class="w-full rounded-xl border border-slate-800 px-3 py-2 text-xs" />
+            </div>
           </div>
 
           <div class="pt-2 flex flex-wrap items-center justify-between gap-3 border-t border-slate-800">
@@ -767,8 +810,11 @@
               <input id="newMedPriceInput" type="number" min="1" required placeholder="35" class="w-full rounded-xl border border-slate-800 px-3 py-2 text-xs font-mono" />
             </div>
             <div>
-              <label for="newMedStockInput" class="block font-semibold text-slate-300 mb-1">Stock Available *</label>
-              <input id="newMedStockInput" type="number" min="0" required value="50" class="w-full rounded-xl border border-slate-800 px-3 py-2 text-xs font-mono" />
+              <label for="newMedStockInput" class="block font-semibold text-slate-300 mb-1">Stock & Expiry *</label>
+              <div class="grid grid-cols-2 gap-1">
+                <input id="newMedStockInput" type="number" min="0" required value="50" title="Available Stock" class="w-full rounded-xl border border-slate-800 px-2 py-2 text-xs font-mono" />
+                <input id="newMedExpiryInput" type="text" value="12/2027" placeholder="MM/YYYY" title="Medicine Expiry Date (MM/YYYY)" class="w-full rounded-xl border border-slate-800 px-2 py-2 text-xs font-mono" />
+              </div>
             </div>
             <div>
               <label for="newMedMinAlertInput" class="block font-semibold text-slate-300 mb-1">Alert Reminder At ≤</label>
@@ -1108,6 +1154,269 @@
   </div>
 
 
+
+  <!-- READ-ONLY PATIENT MOBILE LIVE TOKEN TRACKER VIEW (Triggered via WhatsApp ?track=T-XXX Link) -->
+  <div id="patientLiveTrackerOverlay" class="hidden fixed inset-0 z-50 bg-[#090d16] text-slate-100 overflow-y-auto p-4 flex items-center justify-center no-print">
+    <div class="max-w-md w-full bg-slate-900 rounded-2xl border border-slate-800 p-6 shadow-2xl space-y-5">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-teal-600 text-white font-bold flex items-center justify-center">ZL</div>
+          <div>
+            <h2 id="trackerClinicTitle" class="font-bold text-base text-slate-100">Zero-Line Clinic Hub</h2>
+            <p class="text-xs text-teal-400">Live WhatsApp Patient Queue Tracker</p>
+          </div>
+        </div>
+        <span class="inline-flex items-center gap-1.5 text-[11px] font-mono bg-slate-950 px-2.5 py-1 rounded-full border border-slate-800 text-emerald-400">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Live Sync
+        </span>
+      </div>
+      <div id="patientLiveTrackerBody" class="space-y-4 text-xs"></div>
+      <div class="pt-3 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+        <span>Auto-refreshes every 4 seconds</span>
+        <button id="exitPatientTrackerBtn" type="button" onclick="exitPatientTrackerMode()" class="text-teal-400 hover:underline font-semibold">Staff Login →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TOP-LEFT GEAR (⚙️) MASTER SETTINGS, APPEARANCE, CLOUD SYNC & GOOGLE AUTHENTICATOR VENDOR ADMIN MODAL -->
+  <div id="masterSettingsModal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto no-print">
+    <div class="bg-slate-900 rounded-2xl max-w-4xl w-full p-6 shadow-2xl border border-slate-800 text-slate-100 space-y-6 my-8 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-4">
+        <div class="flex items-center gap-3">
+          <span class="w-9 h-9 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-lg">⚙️</span>
+          <div>
+            <h2 class="font-bold text-base text-slate-100">Clinic Settings, Appearance, Cloud Sync & Vendor Portal</h2>
+            <p class="text-xs text-slate-400">Customize Dark/Light theme, 15 TB Google Drive sync, AutoPay status, or unlock Vendor Sales with Google Authenticator</p>
+          </div>
+        </div>
+        <button id="closeMasterSettingsBtn" type="button" onclick="closeMasterSettingsModal()" class="text-slate-400 hover:text-white font-bold text-base">✕</button>
+      </div>
+
+      <!-- Row 1: Appearance (Dark / Light Mode), Audio Callout, Doctor Signature & Quick Navigation -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+        <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2.5">
+          <div class="font-bold text-teal-400 uppercase tracking-wider">1. Website Appearance</div>
+          <p class="text-slate-400">Switch between Dark Clinical Slate and Clean Daylight White according to customer preference.</p>
+          <div class="flex gap-2 pt-1">
+            <button id="themeDarkBtn" type="button" onclick="setWebsiteTheme('dark')" class="flex-1 py-2 px-3 rounded-xl bg-teal-600 text-white font-bold">🌙 Dark Mode</button>
+            <button id="themeLightBtn" type="button" onclick="setWebsiteTheme('light')" class="flex-1 py-2 px-3 rounded-xl bg-slate-800 text-slate-200 border border-slate-700 font-bold">☀️ Light Mode</button>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2.5">
+          <div class="font-bold text-teal-400 uppercase tracking-wider">2. Queue Chime & Doctor Stamp</div>
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input id="audioChimeToggleInput" type="checkbox" checked onchange="toggleAudioChimeSetting(this.checked)" class="rounded border-slate-700" />
+            <span class="text-slate-200 font-medium">Play Audio Chime & Voice Callout on Next Token</span>
+          </label>
+          <div>
+            <label for="doctorSignatureInput" class="block text-[11px] text-slate-400 mb-1">Printable Doctor Name & Reg. No.</label>
+            <input id="doctorSignatureInput" type="text" value="Dr. Aarav Kulkarni (Reg. No. KMC-48291)" onchange="saveDoctorSignatureSetting(this.value)" class="w-full rounded-lg border border-slate-800 px-2.5 py-1.5 text-xs" />
+          </div>
+        </div>
+
+        <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+          <div class="font-bold text-teal-400 uppercase tracking-wider">3. Clinic Directories & Tools</div>
+          <div class="grid grid-cols-2 gap-1.5">
+            <button type="button" onclick="closeMasterSettingsModal(); switchTab('cloud', true);" class="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 font-semibold text-left">📂 Cloud ID Directory</button>
+            <button type="button" onclick="closeMasterSettingsModal(); openCloudSyncModal();" class="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-teal-300 font-semibold text-left">☁️ 15TB Drive Sync</button>
+            <button type="button" onclick="closeMasterSettingsModal(); openInstallModal();" class="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 font-semibold text-left">💻 Install on Any OS</button>
+            <button type="button" onclick="exportCloudData()" class="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 font-semibold text-left">⬇️ Export Backup</button>
+            <button type="button" onclick="closeMasterSettingsModal(); switchTab('about', true);" class="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 font-semibold text-left">📞 About & Contact</button>
+            <button type="button" onclick="closeMasterSettingsModal(); resetToStorefrontPreviewMode();" class="p-2 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/40 text-amber-300 font-bold text-left">← Back to Paywall</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 2: Active Clinic Subscription & AutoPay Status -->
+      <div class="p-4 rounded-xl bg-slate-950 border border-slate-800 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div class="space-y-1">
+          <div class="font-bold text-slate-100">Active Clinic Subscription & Seamless AutoPay Status</div>
+          <div id="settingsSubscriptionStatusText" class="text-slate-400">Checking plan and renewal date...</div>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <label class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-900 border border-slate-800 cursor-pointer">
+            <input id="settingsAutoPayToggle" type="checkbox" onchange="toggleActiveClinicAutoPay(this.checked)" class="rounded border-slate-700" />
+            <span class="font-semibold text-teal-300">AutoPay Renewal Enabled</span>
+          </label>
+          <button type="button" onclick="simulateAutoPayCycleNow()" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold">
+            Test AutoPay Renewal Cycle
+          </button>
+        </div>
+      </div>
+
+      <!-- Row 3: Google Authenticator (RFC 6238 TOTP) Unlock Gate for Vendor Sales & Income Dashboard -->
+      <div class="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
+          <div>
+            <span class="text-[11px] font-bold uppercase tracking-wider text-teal-400">Google Authenticator (RFC 6238 6-Digit Dynamic TOTP)</span>
+            <h3 class="text-sm font-bold text-slate-100">Vendor Sales, Total Income & Pricing Control Center</h3>
+            <p class="text-xs text-slate-400">Instead of memorizing multiple static codes, enter the 6-digit rotating code from your Google Authenticator app to unlock Vendor Sales, Income Ledger & White-Label Pricing.</p>
+          </div>
+          <span id="totpAdminStatusBadge" class="text-xs font-mono px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-amber-300">Locked • Enter 6-Digit Authenticator Code</span>
+        </div>
+
+        <div id="totpUnlockFormRow" class="flex flex-wrap items-center gap-2">
+          <input id="settingsTotpInput" type="password" inputmode="numeric" maxlength="8" autocomplete="off" placeholder="Enter 6-digit Google Authenticator code" class="w-64 rounded-xl border border-slate-800 px-3 py-2 text-xs font-mono tracking-widest" />
+          <button id="verifySettingsTotpBtn" type="button" onclick="verifyGoogleAuthenticatorCode('settings')" class="px-4 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-bold shadow transition">
+            Verify Authenticator & Unlock Vendor Ledger
+          </button>
+        </div>
+
+        <!-- Hidden Vendor Sales, Income Ledger & Google Authenticator Setup Key (Revealed ONLY after TOTP verification) -->
+        <div id="vendorSalesAndIncomeLedgerBox" class="hidden space-y-5 pt-2">
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 text-xs">
+            <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800">
+              <span class="text-slate-400 block">Total Software Sold</span>
+              <strong id="vendorTotalSoldCount" class="text-xl font-extrabold text-teal-400 font-mono">0</strong>
+              <span id="vendorSoldBreakdownText" class="text-[11px] text-slate-400 block mt-0.5">0 Local • 0 Gold • 0 Platinum</span>
+            </div>
+            <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800">
+              <span class="text-slate-400 block">Total Income Generated</span>
+              <strong id="vendorTotalIncomeAmount" class="text-xl font-extrabold text-emerald-400 font-mono">₹0</strong>
+              <span class="text-[11px] text-slate-400 block mt-0.5">Verified Encrypted Revenue</span>
+            </div>
+            <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800">
+              <span class="text-slate-400 block">Active AutoPay Mandates</span>
+              <strong id="vendorAutoPayActiveCount" class="text-xl font-extrabold text-teal-300 font-mono">0</strong>
+              <span class="text-[11px] text-slate-400 block mt-0.5">30-Day / 1-Year Seamless</span>
+            </div>
+            <div class="p-3.5 rounded-xl bg-slate-900 border border-slate-800 flex flex-col justify-between">
+              <span class="text-slate-400 block">White-Label Pricing Config</span>
+              <button type="button" onclick="closeMasterSettingsModal(); switchTab('saas', true);" class="mt-1 py-1.5 px-3 rounded-lg bg-teal-600 hover:bg-teal-500 text-white font-bold text-xs">
+                Open SaaS Price Editor →
+              </button>
+            </div>
+          </div>
+
+          <!-- 4-Channel Google Authenticator QR & Secret Key Manager (Privilege Separation) -->
+          <div class="p-4 rounded-xl bg-slate-900 border border-teal-800/80 text-xs space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2.5">
+              <div>
+                <strong class="text-teal-300 text-sm block">📱 4-Role Google Authenticator Manager (Dedicated Key & QR per Task)</strong>
+                <span class="text-[11px] text-slate-400">Scan all 4 QR codes into your Google Authenticator app (or share only the Demo / Cash QR with field sales agents without exposing your Master Admin Ledger).</span>
+              </div>
+              <button id="refreshAll4TotpCodesBtn" type="button" onclick="refreshAllFourTotpPreviews()" class="px-3 py-1.5 rounded-lg bg-slate-950 hover:bg-slate-800 text-teal-300 border border-slate-700 font-bold text-[11px]">
+                ↻ Refresh All 4 Live 6-Digit Codes
+              </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Backward-compatible hidden hooks for single-key references -->
+              <div class="hidden">
+                <img id="totpQrCodeImg" src="" alt="" />
+                <input id="customTotpSecretInput" type="text" value="JBSWY3DPEHPK3PXP" />
+                <code id="totpSecretBase32Display">JBSWY3DPEHPK3PXP</code>
+                <strong id="liveExpectedTotpPreview">------</strong>
+                <button id="generateNewTotpSecretBtn" type="button" onclick="rollRoleTotpSecret('admin')">🎲 Generate New Key</button>
+                <button id="saveCustomTotpSecretBtn" type="button" onclick="saveRoleTotpSecret('admin')">Save & Update QR</button>
+                <button id="refreshLiveTotpPreviewBtn" type="button" onclick="refreshAllFourTotpPreviews()">↻ Show Current 6-Digit Code</button>
+              </div>
+              <!-- KEY 1: LIVE DEMO ACCESS -->
+              <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 flex gap-3 items-center">
+                <div class="p-2 rounded-lg bg-white shrink-0">
+                  <img id="totpQrImg-demo" src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=otpauth%3A%2F%2Ftotp%2FZeroLine%3A1_Live_Demo%3Fsecret%3DJBSWY3DPEHPK3PXA%26issuer%3DZeroLine" alt="QR Code for Live Demo Access" class="w-24 h-24 object-contain" />
+                </div>
+                <div class="space-y-1.5 flex-1 min-w-0">
+                  <div class="flex items-center justify-between">
+                    <strong class="text-teal-300">1. Live Demo Access Key</strong>
+                    <span class="text-[10px] font-mono text-slate-400">Storefront Bypass</span>
+                  </div>
+                  <div class="flex gap-1.5">
+                    <input id="totpInputKey-demo" type="text" value="JBSWY3DPEHPK3PXA" class="w-full rounded-lg border border-slate-800 px-2 py-1 text-[11px] font-mono uppercase text-amber-300" />
+                    <button type="button" onclick="rollRoleTotpSecret('demo')" title="Generate New Key" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold">🎲</button>
+                    <button type="button" onclick="saveRoleTotpSecret('demo')" class="px-2.5 py-1 rounded bg-teal-600 hover:bg-teal-500 text-white font-bold">Save</button>
+                  </div>
+                  <div class="text-[11px] text-slate-400 flex justify-between">
+                    <span>Setup Key: <code id="totpLabelKey-demo" class="text-slate-200 font-mono select-all">JBSWY3DPEHPK3PXA</code></span>
+                    <span>Now: <strong id="totpLiveCode-demo" class="font-mono text-emerald-400">------</strong></span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- KEY 2: PLATINUM CUSTOM RATE PAYWALL -->
+              <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 flex gap-3 items-center">
+                <div class="p-2 rounded-lg bg-white shrink-0">
+                  <img id="totpQrImg-platinum" src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=otpauth%3A%2F%2Ftotp%2FZeroLine%3A2_Platinum_Rate%3Fsecret%3DKRSXG5CTMVRXEZLU%26issuer%3DZeroLine" alt="QR Code for Platinum Custom Rate" class="w-24 h-24 object-contain" />
+                </div>
+                <div class="space-y-1.5 flex-1 min-w-0">
+                  <div class="flex items-center justify-between">
+                    <strong class="text-amber-300">2. Platinum Custom Rate Key</strong>
+                    <span class="text-[10px] font-mono text-slate-400">Custom Paywall</span>
+                  </div>
+                  <div class="flex gap-1.5">
+                    <input id="totpInputKey-platinum" type="text" value="KRSXG5CTMVRXEZLU" class="w-full rounded-lg border border-slate-800 px-2 py-1 text-[11px] font-mono uppercase text-amber-300" />
+                    <button type="button" onclick="rollRoleTotpSecret('platinum')" title="Generate New Key" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold">🎲</button>
+                    <button type="button" onclick="saveRoleTotpSecret('platinum')" class="px-2.5 py-1 rounded bg-teal-600 hover:bg-teal-500 text-white font-bold">Save</button>
+                  </div>
+                  <div class="text-[11px] text-slate-400 flex justify-between">
+                    <span>Setup Key: <code id="totpLabelKey-platinum" class="text-slate-200 font-mono select-all">KRSXG5CTMVRXEZLU</code></span>
+                    <span>Now: <strong id="totpLiveCode-platinum" class="font-mono text-emerald-400">------</strong></span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- KEY 3: CASH PAYMENT VERIFICATION -->
+              <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 flex gap-3 items-center">
+                <div class="p-2 rounded-lg bg-white shrink-0">
+                  <img id="totpQrImg-cash" src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=otpauth%3A%2F%2Ftotp%2FZeroLine%3A3_Cash_Payment%3Fsecret%3DMFRGGZDFMZTWQ2LK%26issuer%3DZeroLine" alt="QR Code for Cash Payment Auth" class="w-24 h-24 object-contain" />
+                </div>
+                <div class="space-y-1.5 flex-1 min-w-0">
+                  <div class="flex items-center justify-between">
+                    <strong class="text-emerald-300">3. Cash Payment Auth Key</strong>
+                    <span class="text-[10px] font-mono text-slate-400">Checkout Cash Gate</span>
+                  </div>
+                  <div class="flex gap-1.5">
+                    <input id="totpInputKey-cash" type="text" value="MFRGGZDFMZTWQ2LK" class="w-full rounded-lg border border-slate-800 px-2 py-1 text-[11px] font-mono uppercase text-amber-300" />
+                    <button type="button" onclick="rollRoleTotpSecret('cash')" title="Generate New Key" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold">🎲</button>
+                    <button type="button" onclick="saveRoleTotpSecret('cash')" class="px-2.5 py-1 rounded bg-teal-600 hover:bg-teal-500 text-white font-bold">Save</button>
+                  </div>
+                  <div class="text-[11px] text-slate-400 flex justify-between">
+                    <span>Setup Key: <code id="totpLabelKey-cash" class="text-slate-200 font-mono select-all">MFRGGZDFMZTWQ2LK</code></span>
+                    <span>Now: <strong id="totpLiveCode-cash" class="font-mono text-emerald-400">------</strong></span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- KEY 4: MASTER ADMIN & INCOME LEDGER -->
+              <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 flex gap-3 items-center">
+                <div class="p-2 rounded-lg bg-white shrink-0">
+                  <img id="totpQrImg-admin" src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=otpauth%3A%2F%2Ftotp%2FZeroLine%3A4_Master_Admin%3Fsecret%3DJBSWY3DPEHPK3PXP%26issuer%3DZeroLine" alt="QR Code for Master Admin Ledger" class="w-24 h-24 object-contain" />
+                </div>
+                <div class="space-y-1.5 flex-1 min-w-0">
+                  <div class="flex items-center justify-between">
+                    <strong class="text-rose-300">4. Master Admin & Income Key</strong>
+                    <span class="text-[10px] font-mono text-slate-400">Sales & Kill-Switch</span>
+                  </div>
+                  <div class="flex gap-1.5">
+                    <input id="totpInputKey-admin" type="text" value="JBSWY3DPEHPK3PXP" class="w-full rounded-lg border border-slate-800 px-2 py-1 text-[11px] font-mono uppercase text-amber-300" />
+                    <button type="button" onclick="rollRoleTotpSecret('admin')" title="Generate New Key" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold">🎲</button>
+                    <button type="button" onclick="saveRoleTotpSecret('admin')" class="px-2.5 py-1 rounded bg-teal-600 hover:bg-teal-500 text-white font-bold">Save</button>
+                  </div>
+                  <div class="text-[11px] text-slate-400 flex justify-between">
+                    <span>Setup Key: <code id="totpLabelKey-admin" class="text-slate-200 font-mono select-all">JBSWY3DPEHPK3PXP</code></span>
+                    <span>Now: <strong id="totpLiveCode-admin" class="font-mono text-emerald-400">------</strong></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sold Software Licenses & Remote Kill-Switch Table -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between">
+              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-300">Sold Clinic Licenses, AutoPay Status & Remote Kill-Switch</h4>
+              <button type="button" onclick="exportVendorSalesCsv()" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-teal-300 border border-slate-700 text-[11px] font-semibold">
+                ⬇️ Export Sales & Income CSV
+              </button>
+            </div>
+            <div id="vendorSalesTableContainer" class="border border-slate-800 rounded-xl overflow-x-auto"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Staff Role PIN Lock Modal (Admin Key Hidden) -->
   <div id="pinModal" class="hidden fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
     <div class="bg-slate-900 rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-800 text-slate-100 space-y-4">
@@ -1322,20 +1631,20 @@ function doPost(e){var f=DriveApp.getRootFolder().getFilesByName("zeroline_db.js
 
     // --- Standardized Medicine Formulary (Error-Free Dropdown) ---
     const DEFAULT_FORMULARY = [
-      { id: "MED-01", name: "Paracetamol Tab", power: "650mg", activeClass: "Acetaminophen / Fever", unitPrice: 30, stock: 45, minStock: 10 },
-      { id: "MED-02", name: "Amoxicillin + Clavulanate Tab", power: "625mg", activeClass: "Penicillin Antibiotic", unitPrice: 180, stock: 28, minStock: 10 },
-      { id: "MED-03", name: "Azithromycin Tab", power: "500mg", activeClass: "Macrolide Antibiotic", unitPrice: 120, stock: 10, minStock: 10 },
-      { id: "MED-04", name: "Cetirizine Tab", power: "10mg", activeClass: "Antihistamine / Allergy", unitPrice: 25, stock: 60, minStock: 10 },
-      { id: "MED-05", name: "Pantoprazole Tab", power: "40mg", activeClass: "PPI / Acidity", unitPrice: 65, stock: 40, minStock: 10 },
-      { id: "MED-06", name: "Metformin SR Tab", power: "500mg", activeClass: "Biguanide / Diabetes", unitPrice: 55, stock: 35, minStock: 10 },
-      { id: "MED-07", name: "Ibuprofen Tab", power: "400mg", activeClass: "NSAID / Painkiller", unitPrice: 40, stock: 25, minStock: 10 },
-      { id: "MED-08", name: "Cotrimoxazole DS Tab", power: "800/160mg", activeClass: "Sulfa Antibiotic", unitPrice: 45, stock: 18, minStock: 10 },
-      { id: "MED-09", name: "Montelukast + Levocetirizine Tab", power: "10mg/5mg", activeClass: "Asthma / Cold Allergy", unitPrice: 110, stock: 8, minStock: 10 },
-      { id: "MED-10", name: "Amlodipine Tab", power: "5mg", activeClass: "CCB / Blood Pressure", unitPrice: 45, stock: 50, minStock: 10 },
-      { id: "MED-11", name: "Atorvastatin Tab", power: "10mg", activeClass: "Statin / Cholesterol", unitPrice: 90, stock: 30, minStock: 10 },
-      { id: "MED-12", name: "Dextromethorphan Cough Syrup", power: "100ml", activeClass: "Antitussive / Dry Cough", unitPrice: 85, stock: 14, minStock: 10 },
-      { id: "MED-13", name: "ORS Electral Sachet", power: "21.8g", activeClass: "Electrolyte / Dehydration", unitPrice: 22, stock: 75, minStock: 15 },
-      { id: "MED-14", name: "Vitamin D3 Cholecalciferol Cap", power: "60,000 IU", activeClass: "Supplement / Bone", unitPrice: 130, stock: 22, minStock: 10 }
+      { id: "MED-01", name: "Paracetamol Tab", power: "650mg", activeClass: "Acetaminophen / Fever", unitPrice: 30, stock: 45, minStock: 10, expiry: "12/2027" },
+      { id: "MED-02", name: "Amoxicillin + Clavulanate Tab", power: "625mg", activeClass: "Penicillin Antibiotic", unitPrice: 180, stock: 28, minStock: 10, expiry: "10/2027" },
+      { id: "MED-03", name: "Azithromycin Tab", power: "500mg", activeClass: "Macrolide Antibiotic", unitPrice: 120, stock: 10, minStock: 10, expiry: "11/2026" },
+      { id: "MED-04", name: "Cetirizine Tab", power: "10mg", activeClass: "Antihistamine / Allergy", unitPrice: 25, stock: 60, minStock: 10, expiry: "08/2028" },
+      { id: "MED-05", name: "Pantoprazole Tab", power: "40mg", activeClass: "PPI / Acidity", unitPrice: 65, stock: 40, minStock: 10, expiry: "06/2027" },
+      { id: "MED-06", name: "Metformin SR Tab", power: "500mg", activeClass: "Biguanide / Diabetes", unitPrice: 55, stock: 35, minStock: 10, expiry: "09/2027" },
+      { id: "MED-07", name: "Ibuprofen Tab", power: "400mg", activeClass: "NSAID / Painkiller", unitPrice: 40, stock: 25, minStock: 10, expiry: "05/2027" },
+      { id: "MED-08", name: "Cotrimoxazole DS Tab", power: "800/160mg", activeClass: "Sulfa Antibiotic", unitPrice: 45, stock: 18, minStock: 10, expiry: "11/2027" },
+      { id: "MED-09", name: "Montelukast + Levocetirizine Tab", power: "10mg/5mg", activeClass: "Asthma / Cold Allergy", unitPrice: 110, stock: 8, minStock: 10, expiry: "11/2026" },
+      { id: "MED-10", name: "Amlodipine Tab", power: "5mg", activeClass: "CCB / Blood Pressure", unitPrice: 45, stock: 50, minStock: 10, expiry: "04/2028" },
+      { id: "MED-11", name: "Atorvastatin Tab", power: "10mg", activeClass: "Statin / Cholesterol", unitPrice: 90, stock: 30, minStock: 10, expiry: "07/2028" },
+      { id: "MED-12", name: "Dextromethorphan Cough Syrup", power: "100ml", activeClass: "Antitussive / Dry Cough", unitPrice: 85, stock: 14, minStock: 10, expiry: "03/2027" },
+      { id: "MED-13", name: "ORS Electral Sachet", power: "21.8g", activeClass: "Electrolyte / Dehydration", unitPrice: 22, stock: 75, minStock: 15, expiry: "01/2028" },
+      { id: "MED-14", name: "Vitamin D3 Cholecalciferol Cap", power: "60,000 IU", activeClass: "Supplement / Bone", unitPrice: 130, stock: 22, minStock: 10, expiry: "12/2027" }
     ];
 
     function getFormulary() {
@@ -1623,7 +1932,9 @@ function doPost(e){var f=DriveApp.getRootFolder().getFilesByName("zeroline_db.js
       const phone = document.getElementById("formPhone").value.trim();
       const age = parseInt(document.getElementById("formAge").value, 10) || 30;
       const blood = document.getElementById("formBlood").value;
-      const vitals = document.getElementById("formVitals").value.trim() || "120/80, 98.6°F";
+      const rawVitals = document.getElementById("formVitals").value.trim() || "120/80, 98.6°F";
+      const weightKg = document.getElementById("formWeight") ? document.getElementById("formWeight").value.trim() : "";
+      const vitals = weightKg ? `${rawVitals} • ${weightKg} kg` : rawVitals;
       const allergies = document.getElementById("formAllergies").value.trim() || "None";
       const conditions = document.getElementById("formConditions").value.trim() || "None";
       const complaint = document.getElementById("formComplaint").value.trim();
@@ -1707,10 +2018,9 @@ function doPost(e){var f=DriveApp.getRootFolder().getFilesByName("zeroline_db.js
         ? "HEAD TO CLINIC NOW: Your turn is in ~10 mins (or active now). Walk straight in!"
         : `WAIT AT HOME: ${waitingAhead} patient(s) ahead (~${estMins} mins). Arrive 10 mins before your turn.`;
 
-      return `*${state.saasConfig.brandName} — Live Token*
-Hello ${p.name} (Cloud ID: ${p.cloudId})
-Live Token: *${item.token}* (${item.status.replace("_", " ")})
-${statusAdvice}`;
+      const baseUrl = (window.location.origin && window.location.origin !== "null" ? window.location.origin + window.location.pathname : "https://preetamdalabhanjan-ship-it.github.io/zero-line-pro/");
+      const liveTrackUrl = `${baseUrl}?track=${encodeURIComponent(item.token)}`;
+      return `*${state.saasConfig.brandName} — Live Token*\nHello ${p.name} (Cloud ID: ${p.cloudId})\nLive Token: *${item.token}* (${item.status.replace("_", " ")})\n${statusAdvice}\nLive Queue Tracker: ${liveTrackUrl}`;
     }
 
     function sendRealWhatsApp(tokenStr) {
@@ -1773,16 +2083,18 @@ ${statusAdvice}`;
       showToast("Session locked. Protected clinical & admin tabs require verification.");
     }
 
-    function submitPinVerification(e) {
+    async function submitPinVerification(e) {
       e.preventDefault();
       const entered = document.getElementById("pinInputField").value.trim();
       const docPin = (state.saasConfig && state.saasConfig.doctorPin) || "1234";
-      if (entered === "2569" || entered === "1989") {
+      const isAdminOk = await isValidVendorCode(entered, ["2569", "1989"]);
+
+      if (isAdminOk) {
         unlockedRoles.doctor = true;
         unlockedRoles.saas = true;
         updatePinLockBadge();
         closePinModal();
-        showToast("Admin access verified and unlocked.");
+        showToast("✓ Google Authenticator / Admin access verified and unlocked.");
         if (pendingTargetTab === "doctor" || pendingTargetTab === "saas") {
           switchTab(pendingTargetTab, true);
         }
@@ -1800,7 +2112,7 @@ ${statusAdvice}`;
         return;
       }
 
-      showToast("Invalid access key. Access denied.");
+      showToast("Invalid Google Authenticator or Staff Key. Access denied.");
     }
 
     // --- Multi-Device Cloud Database Sync (Firebase Realtime DB / REST JSON) ---
@@ -1914,8 +2226,27 @@ ${statusAdvice}`;
         <div>Hello <strong>${escapeHtml(p.name)}</strong> (Cloud ID: <span class="underline">${p.cloudId}</span>)</div>
         <div>Your Live Token: <strong>${item.token}</strong> | Status: <strong>${item.status.replace("_", " ")}</strong></div>
         <div class="text-amber-300 font-semibold">${departAlert}</div>
-        <div class="text-emerald-200/80">Live Tracker Link: https://zeroline.clinic/t/${item.token}-${p.cloudId}</div>
+        <div class="flex items-center justify-between gap-2 pt-1">
+          <span class="text-emerald-200/80 truncate">Live Mobile Tracker: ?track=${item.token}</span>
+          <button type="button" onclick="openPatientTrackerPreview('${item.token}')" class="px-2 py-0.5 rounded bg-emerald-800 hover:bg-emerald-700 text-emerald-100 text-[10px] font-sans font-bold shrink-0">Test Patient Mobile View →</button>
+        </div>
       `;
+    }
+
+    function toggleEmergencyPriority(tokenStr) {
+      const item = state.queue.find((q) => q.token === tokenStr);
+      if (!item || item.status !== "WAITING") return;
+      item.priority = !item.priority;
+      // Re-order queue so priority WAITING patients sit ahead of regular WAITING patients
+      const inConsult = state.queue.filter((q) => q.status === "IN_CONSULT");
+      const waitingPriority = state.queue.filter((q) => q.status === "WAITING" && q.priority);
+      const waitingNormal = state.queue.filter((q) => q.status === "WAITING" && !q.priority);
+      const others = state.queue.filter((q) => q.status !== "IN_CONSULT" && q.status !== "WAITING");
+      state.queue = [...inConsult, ...waitingPriority, ...waitingNormal, ...others];
+      saveState();
+      renderAll();
+      const p = state.patients[item.cloudId] || { name: tokenStr };
+      showToast(item.priority ? `⚡ Marked ${item.token} (${p.name}) as EMERGENCY PRIORITY — Moved to top of queue!` : `Removed priority flag for ${item.token}.`);
     }
 
     function sendNextToDoctor() {
@@ -1925,16 +2256,78 @@ ${statusAdvice}`;
         switchTab("doctor");
         return;
       }
-      const nextWaiting = state.queue.find((q) => q.status === "WAITING");
+      const nextWaiting = state.queue.find((q) => q.status === "WAITING" && q.priority) || state.queue.find((q) => q.status === "WAITING");
       if (!nextWaiting) {
         showToast("No waiting patients in the queue.");
         return;
       }
       nextWaiting.status = "IN_CONSULT";
       activeDoctorToken = nextWaiting.token;
+      const p = state.patients[nextWaiting.cloudId] || { name: "" };
+      playQueueCalloutChime(nextWaiting.token, p.name);
       saveState();
       renderAll();
-      showToast(`Token ${nextWaiting.token} sent to Doctor's Tablet.`);
+      showToast(`🔔 Calling Token ${nextWaiting.token} (${p.name}) into Doctor's Room!`);
+    }
+
+    function openPatientTrackerPreview(tokenStr) {
+      renderPatientLiveTrackerModal(tokenStr);
+      document.getElementById("patientLiveTrackerOverlay").classList.remove("hidden");
+    }
+
+    function exitPatientTrackerMode() {
+      document.getElementById("patientLiveTrackerOverlay").classList.add("hidden");
+      try {
+        if (window.location.search.includes("track=")) {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      } catch (e) {}
+    }
+
+    function renderPatientLiveTrackerModal(tokenStr) {
+      const item = state.queue.find((q) => q.token === tokenStr) || state.queue[0];
+      const body = document.getElementById("patientLiveTrackerBody");
+      const title = document.getElementById("trackerClinicTitle");
+      if (title && state.saasConfig) title.textContent = state.saasConfig.brandName || "Zero-Line Clinic Hub";
+      if (!body) return;
+      if (!item) {
+        body.innerHTML = `<div class="p-4 rounded-xl bg-slate-950 border border-slate-800 text-slate-400">Token not found in today's active queue.</div>`;
+        return;
+      }
+      const p = state.patients[item.cloudId] || { name: "Patient", cloudId: item.cloudId };
+      const waitingList = state.queue.filter((q) => q.status === "WAITING");
+      const posIdx = waitingList.findIndex((q) => q.token === item.token);
+      const aheadCount = item.status === "IN_CONSULT" ? 0 : (posIdx >= 0 ? posIdx + (state.queue.some((q) => q.status === "IN_CONSULT") ? 1 : 0) : 0);
+      const estMins = aheadCount * 10;
+
+      let statusBanner = `<div class="p-3.5 rounded-xl bg-teal-950/80 border border-teal-700 text-teal-200 font-bold text-sm">🏠 Wait Comfortably at Home • ~${estMins} mins (${aheadCount} ahead)</div>`;
+      if (item.status === "IN_CONSULT") {
+        statusBanner = `<div class="p-3.5 rounded-xl bg-emerald-600 text-white font-extrabold text-sm">🚀 IT IS YOUR TURN NOW! Please enter the Doctor's Cabin.</div>`;
+      } else if (estMins <= 10 && item.status === "WAITING") {
+        statusBanner = `<div class="p-3.5 rounded-xl bg-amber-500 text-slate-950 font-extrabold text-sm">🚶‍♂️ Arrive at Clinic Now! Your turn is in ~10 minutes.</div>`;
+      } else if (item.status === "PHARMACY_READY" || item.status === "COMPLETED") {
+        statusBanner = `<div class="p-3.5 rounded-xl bg-emerald-950 border border-emerald-700 text-emerald-300 font-bold text-sm">✓ Consultation Complete • Proceed to Front Desk / Pharmacy Counter</div>`;
+      }
+
+      body.innerHTML = `
+        <div class="p-4 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-between">
+          <div>
+            <span class="text-slate-400 block">Your Live Token</span>
+            <strong class="text-3xl font-extrabold font-mono text-teal-400">${item.token}</strong>
+            ${item.priority ? `<span class="ml-2 px-2 py-0.5 rounded bg-rose-600 text-white text-[10px] font-bold">⚡ PRIORITY</span>` : ""}
+          </div>
+          <div class="text-right">
+            <span class="text-slate-400 block">Cloud Health ID</span>
+            <strong class="font-mono text-sm text-slate-200">${p.cloudId}</strong>
+            <span class="block text-[11px] text-slate-400">${escapeHtml(p.name)}</span>
+          </div>
+        </div>
+        ${statusBanner}
+        <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-1 text-slate-300">
+          <div class="flex justify-between"><span>Current Stage:</span><strong class="text-teal-300">${item.status.replace("_", " ")}</strong></div>
+          <div class="flex justify-between"><span>Checked-In Time:</span><span class="font-mono">${item.checkInTime}</span></div>
+        </div>
+      `;
     }
 
     // --- Doctor Tablet Logic (Search Bar + Low-Stock Danger Alert at <= minStock + Auto Stock Deduction) ---
@@ -2141,6 +2534,31 @@ ${statusAdvice}`;
       `;
     }
 
+
+    function toggleLabTest(testName) {
+      const inp = document.getElementById("rxLabTestsInput");
+      if (!inp) return;
+      let parts = inp.value
+        .split(",")
+        .map((x) => x.trim())
+        .filter(Boolean);
+      if (parts.includes(testName)) {
+        parts = parts.filter((x) => x !== testName);
+      } else {
+        parts.push(testName);
+      }
+      inp.value = parts.join(", ");
+      const badge = document.getElementById("selectedLabsBadge");
+      if (badge) badge.textContent = `${parts.length} test(s) selected`;
+    }
+
+    function setQuickFollowUpDays(days) {
+      const d = new Date(Date.now() + days * 86400000);
+      const iso = d.toISOString().slice(0, 10);
+      const inp = document.getElementById("rxFollowUpDate");
+      if (inp) inp.value = iso;
+    }
+
     function completeConsultation() {
       const item = state.queue.find((q) => q.token === activeDoctorToken);
       if (!item) {
@@ -2151,9 +2569,14 @@ ${statusAdvice}`;
       const consultFee = parseInt(document.getElementById("rxConsultFee").value, 10) || 500;
       const notes = document.getElementById("rxNotes").value.trim() || "Follow standard dosage instructions.";
 
+      const labTests = document.getElementById("rxLabTestsInput") ? document.getElementById("rxLabTestsInput").value.trim() : "";
+      const followUpDate = document.getElementById("rxFollowUpDate") ? document.getElementById("rxFollowUpDate").value : "";
+
       item.diagnosis = diagnosis;
       item.consultFee = consultFee;
       item.medicines = JSON.parse(JSON.stringify(draftRxMedicines));
+      item.labTests = labTests;
+      item.followUpDate = followUpDate;
       item.notes = notes;
       item.status = "PHARMACY_READY";
 
@@ -2168,16 +2591,20 @@ ${statusAdvice}`;
           diagnosis,
           vitals: item.vitals,
           medicines: item.medicines.map((m) => `${m.name} (${m.dosage} for ${m.days}d)`),
+          labTests,
+          followUpDate,
           notes,
           totalBill
         });
       }
 
-      // Automatically promote next waiting patient into Doctor's room
-      const nextWaiting = state.queue.find((q) => q.status === "WAITING");
+      // Automatically promote highest-priority waiting patient into Doctor's room with audio chime
+      const nextWaiting = state.queue.find((q) => q.status === "WAITING" && q.priority) || state.queue.find((q) => q.status === "WAITING");
       if (nextWaiting) {
         nextWaiting.status = "IN_CONSULT";
         activeDoctorToken = nextWaiting.token;
+        const nextP = state.patients[nextWaiting.cloudId] || { name: "" };
+        playQueueCalloutChime(nextWaiting.token, nextP.name);
       } else {
         activeDoctorToken = "";
       }
@@ -2185,6 +2612,9 @@ ${statusAdvice}`;
       draftRxMedicines = [];
       document.getElementById("rxDiagnosis").value = "";
       document.getElementById("rxNotes").value = "";
+      if (document.getElementById("rxLabTestsInput")) document.getElementById("rxLabTestsInput").value = "";
+      if (document.getElementById("rxFollowUpDate")) document.getElementById("rxFollowUpDate").value = "";
+      if (document.getElementById("selectedLabsBadge")) document.getElementById("selectedLabsBadge").textContent = "0 tests selected";
 
       saveState();
       renderAll();
@@ -2290,9 +2720,19 @@ ${statusAdvice}`;
             </tbody>
           </table>
         </div>
+        ${item.labTests ? `<div class="text-slate-200"><strong>Lab / Diagnostic Tests Ordered:</strong> ${escapeHtml(item.labTests)}</div>` : ""}
+        ${item.followUpDate ? `<div class="text-teal-300 font-semibold"><strong>Next Follow-Up Review Date:</strong> ${escapeHtml(item.followUpDate)}</div>` : ""}
         <div class="text-slate-300"><strong>Advice:</strong> ${escapeHtml(item.notes || "—")}</div>
-        <div class="p-2 rounded-lg bg-slate-950 border border-slate-800 text-[11px] font-mono text-teal-300">
-          🛡️ Encrypted Payment Vault Token: ${escapeHtml(item.encryptedPaymentVaultId || "PENDING-PAYMENT")} (Zero-Leak Protected)
+        <div class="p-2 rounded-lg bg-slate-950 border border-slate-800 text-[11px] font-mono text-teal-300 flex flex-wrap items-center justify-between gap-2">
+          <span>🛡️ Vault Token: ${escapeHtml(item.encryptedPaymentVaultId || "PENDING-PAYMENT")}</span>
+          <span>Cloud ID: ${p.cloudId}</span>
+        </div>
+        <div class="pt-3 border-t border-slate-800 flex items-end justify-between text-xs">
+          <div class="text-[11px] text-slate-400">Present Unique ID <strong>${p.cloudId}</strong> on your next visit.</div>
+          <div class="text-right">
+            <div class="font-bold text-slate-200">${escapeHtml((state.saasConfig && state.saasConfig.doctorSignature) || "Dr. Aarav Kulkarni (Reg. No. KMC-48291)")}</div>
+            <div class="text-[10px] text-slate-400">Authorized Digital Prescription Signature</div>
+          </div>
         </div>
       `;
       document.getElementById("slipModal").classList.remove("hidden");
@@ -2577,6 +3017,501 @@ ${statusAdvice}`;
 
 
     
+    
+    // --- 4-Role RFC 6238 Google Authenticator Engine (Privilege Separation per Task) ---
+    const DEFAULT_TOTP_SECRET_BASE32 = "JBSWY3DPEHPK3PXP";
+    const DEFAULT_ROLE_TOTP_SECRETS = {
+      demo: "JBSWY3DPEHPK3PXA",      // Task 1: Live Demo Access (Storefront Bypass)
+      platinum: "KRSXG5CTMVRXEZLU",  // Task 2: Platinum Custom Rate Paywall
+      cash: "MFRGGZDFMZTWQ2LK",      // Task 3: Cash Payment Checkout Verification
+      admin: "JBSWY3DPEHPK3PXP"      // Task 4: Master Admin, Sales & Income Ledger
+    };
+
+    function getRoleTotpSecret(roleType) {
+      const keyName = roleType && DEFAULT_ROLE_TOTP_SECRETS[roleType] ? roleType : "admin";
+      if (state.saasConfig && state.saasConfig.totpSecrets && state.saasConfig.totpSecrets[keyName]) {
+        const custom = String(state.saasConfig.totpSecrets[keyName]).trim().toUpperCase().replace(/[^A-Z2-7]/g, "");
+        if (custom.length >= 8) return custom;
+      }
+      return DEFAULT_ROLE_TOTP_SECRETS[keyName];
+    }
+
+    function rollRoleTotpSecret(roleType) {
+      const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+      let out = "";
+      const rand = new Uint8Array(16);
+      if (window.crypto && window.crypto.getRandomValues) {
+        window.crypto.getRandomValues(rand);
+        for (let i = 0; i < 16; i++) out += alphabet[rand[i] % 32];
+      } else {
+        for (let i = 0; i < 16; i++) out += alphabet[Math.floor(Math.random() * 32)];
+      }
+      const inp = document.getElementById("totpInputKey-" + roleType);
+      if (inp) inp.value = out;
+      showToast(`Generated new ${roleType.toUpperCase()} Base32 key! Click 'Save' to update its QR code.`);
+    }
+
+    function saveRoleTotpSecret(roleType) {
+      const inp = document.getElementById("totpInputKey-" + roleType);
+      const raw = (inp ? inp.value : "").toUpperCase().replace(/[^A-Z2-7]/g, "");
+      if (raw.length < 8) {
+        showToast("Secret key must be at least 8 Base32 characters (letters A-Z and digits 2-7).");
+        return;
+      }
+      if (!state.saasConfig) state.saasConfig = {};
+      if (!state.saasConfig.totpSecrets) state.saasConfig.totpSecrets = Object.assign({}, DEFAULT_ROLE_TOTP_SECRETS);
+      state.saasConfig.totpSecrets[roleType] = raw;
+      saveState();
+      updateTotpEnrollmentUi();
+      refreshAllFourTotpPreviews();
+      showToast(`✓ Saved dedicated ${roleType.toUpperCase()} Authenticator key & updated its QR code!`);
+    }
+
+    function updateTotpEnrollmentUi() {
+      const labelMap = {
+        demo: "1_Live_Demo",
+        platinum: "2_Platinum_Rate",
+        cash: "3_Cash_Payment",
+        admin: "4_Master_Admin"
+      };
+      ["demo", "platinum", "cash", "admin"].forEach((role) => {
+        const sec = getRoleTotpSecret(role);
+        const inp = document.getElementById("totpInputKey-" + role);
+        if (inp) inp.value = sec;
+        const lbl = document.getElementById("totpLabelKey-" + role);
+        if (lbl) lbl.textContent = sec;
+        const qr = document.getElementById("totpQrImg-" + role);
+        if (qr) {
+          const uri = `otpauth://totp/ZeroLine:${labelMap[role]}?secret=${sec}&issuer=ZeroLine`;
+          qr.src = `https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=${encodeURIComponent(uri)}`;
+        }
+      });
+    }
+
+    async function refreshAllFourTotpPreviews() {
+      const nowStep = Math.floor(Date.now() / 30000);
+      for (const role of ["demo", "platinum", "cash", "admin"]) {
+        const sec = getRoleTotpSecret(role);
+        const code = await generateTotpForCounter(sec, nowStep);
+        const el = document.getElementById("totpLiveCode-" + role);
+        if (el) el.textContent = code || "------";
+      }
+    }
+
+    async function refreshLiveTotpPreviewCode() {
+      await refreshAllFourTotpPreviews();
+    }
+
+    function base32ToBytes(b32) {
+      const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+      let bits = "";
+      const clean = String(b32 || "").toUpperCase().replace(/[^A-Z2-7]/g, "");
+      for (let i = 0; i < clean.length; i++) {
+        const val = alphabet.indexOf(clean[i]);
+        if (val >= 0) bits += val.toString(2).padStart(5, "0");
+      }
+      const bytes = [];
+      for (let i = 0; i + 8 <= bits.length; i += 8) {
+        bytes.push(parseInt(bits.slice(i, i + 8), 2));
+      }
+      return new Uint8Array(bytes);
+    }
+
+    async function generateTotpForCounter(secretBase32, counter) {
+      try {
+        if (!window.crypto || !window.crypto.subtle) return null;
+        const keyBytes = base32ToBytes(secretBase32);
+        const buf = new ArrayBuffer(8);
+        const view = new DataView(buf);
+        view.setUint32(0, Math.floor(counter / 0x100000000), false);
+        view.setUint32(4, counter >>> 0, false);
+        const cryptoKey = await window.crypto.subtle.importKey(
+          "raw",
+          keyBytes,
+          { name: "HMAC", hash: "SHA-1" },
+          false,
+          ["sign"]
+        );
+        const sig = new Uint8Array(await window.crypto.subtle.sign("HMAC", cryptoKey, buf));
+        const offset = sig[sig.length - 1] & 0x0f;
+        const binCode =
+          ((sig[offset] & 0x7f) << 24) |
+          ((sig[offset + 1] & 0xff) << 16) |
+          ((sig[offset + 2] & 0xff) << 8) |
+          (sig[offset + 3] & 0xff);
+        return String(binCode % 1000000).padStart(6, "0");
+      } catch (e) {
+        return null;
+      }
+    }
+
+    async function isValidRoleTotpCode(enteredRaw, roleType, allowedLegacyCodes) {
+      const entered = String(enteredRaw || "").trim();
+      if (!entered) return false;
+      if (allowedLegacyCodes && allowedLegacyCodes.includes(entered)) return true;
+      const roleSecret = getRoleTotpSecret(roleType);
+      const nowStep = Math.floor(Date.now() / 30000);
+      for (const delta of [-1, 0, 1]) {
+        const code = await generateTotpForCounter(roleSecret, nowStep + delta);
+        if (code && entered === code) return true;
+      }
+      return false;
+    }
+
+    async function isValidVendorCode(enteredRaw, allowedLegacyCodes) {
+      return await isValidRoleTotpCode(enteredRaw, "admin", allowedLegacyCodes);
+    }
+
+    // --- Web Audio Queue Callout Chime & Voice Synthesis ---
+    function playQueueCalloutChime(tokenStr, patientName) {
+      const cfg = state.saasConfig || {};
+      if (cfg.audioChimeMuted) return;
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) {
+          const ctx = new AudioCtx();
+          const notes = [523.25, 659.25, 783.99];
+          notes.forEach((freq, idx) => {
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(freq, ctx.currentTime + idx * 0.14);
+            gain.gain.setValueAtTime(0.12, ctx.currentTime + idx * 0.14);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + idx * 0.14 + 0.35);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(ctx.currentTime + idx * 0.14);
+            osc.stop(ctx.currentTime + idx * 0.14 + 0.36);
+          });
+        }
+        if ("speechSynthesis" in window && tokenStr) {
+          window.speechSynthesis.cancel();
+          const utter = new SpeechSynthesisUtterance(`Token ${tokenStr.replace("-", " ")}, ${patientName || ""}, please proceed to the doctor's cabin.`);
+          utter.rate = 0.98;
+          window.speechSynthesis.speak(utter);
+        }
+      } catch (e) {}
+    }
+
+    // --- Top-Left Gear (⚙️) Settings, Theme Switcher & Vendor Sales Ledger ---
+    function openMasterSettingsModal() {
+      renderMasterSettingsModal();
+      document.getElementById("masterSettingsModal").classList.remove("hidden");
+    }
+
+    function closeMasterSettingsModal() {
+      document.getElementById("masterSettingsModal").classList.add("hidden");
+    }
+
+    function setWebsiteTheme(mode) {
+      if (!state.saasConfig) state.saasConfig = {};
+      state.saasConfig.themeMode = mode === "light" ? "light" : "dark";
+      applySavedWebsiteTheme();
+      saveState();
+      renderMasterSettingsModal();
+      showToast(`Switched website appearance to ${mode === "light" ? "Clean Daylight Light Mode" : "Dark Clinical Slate Mode"}.`);
+    }
+
+    function applySavedWebsiteTheme() {
+      const mode = (state.saasConfig && state.saasConfig.themeMode) || "dark";
+      if (mode === "light") {
+        document.body.classList.add("light-theme");
+      } else {
+        document.body.classList.remove("light-theme");
+      }
+      const dBtn = document.getElementById("themeDarkBtn");
+      const lBtn = document.getElementById("themeLightBtn");
+      if (dBtn && lBtn) {
+        if (mode === "light") {
+          lBtn.className = "flex-1 py-2 px-3 rounded-xl bg-teal-600 text-white font-bold";
+          dBtn.className = "flex-1 py-2 px-3 rounded-xl bg-slate-800 text-slate-200 border border-slate-700 font-bold";
+        } else {
+          dBtn.className = "flex-1 py-2 px-3 rounded-xl bg-teal-600 text-white font-bold";
+          lBtn.className = "flex-1 py-2 px-3 rounded-xl bg-slate-800 text-slate-200 border border-slate-700 font-bold";
+        }
+      }
+    }
+
+    function toggleAudioChimeSetting(enabled) {
+      if (!state.saasConfig) state.saasConfig = {};
+      state.saasConfig.audioChimeMuted = !enabled;
+      saveState();
+      showToast(enabled ? "Queue Audio Chime & Voice Callout enabled." : "Queue Audio Chime muted.");
+    }
+
+    function saveDoctorSignatureSetting(val) {
+      if (!state.saasConfig) state.saasConfig = {};
+      state.saasConfig.doctorSignature = String(val || "").trim() || "Dr. Aarav Kulkarni (Reg. No. KMC-48291)";
+      saveState();
+      showToast("Saved Doctor Name & Registration signature for printed prescriptions.");
+    }
+
+    function toggleActiveClinicAutoPay(enabled) {
+      if (!state.saasConfig) state.saasConfig = {};
+      state.saasConfig.autoPayEnabled = Boolean(enabled);
+      // Update matching license in vendorSalesLedger
+      const ledger = getVendorSalesLedger();
+      if (ledger.length > 0) {
+        ledger[0].autoPay = Boolean(enabled);
+      }
+      saveState();
+      renderMasterSettingsModal();
+      renderStorefrontPaywallState();
+      showToast(enabled ? "✓ Seamless AutoPay Mandate enabled (auto-renews without interruption)." : "AutoPay paused. Plan will prompt for manual renewal at expiry.");
+    }
+
+    async function simulateAutoPayCycleNow() {
+      const cfg = state.saasConfig || {};
+      if (!cfg.autoPayEnabled) {
+        showToast("Enable 'AutoPay Renewal Enabled' first to test automatic cycle deduction.");
+        return;
+      }
+      const isPlat = (cfg.activePlanName || "").toLowerCase().includes("platinum");
+      const cycleDays = isPlat ? 365 : 30;
+      const amount = isPlat ? (cfg.platinumCustomPrice || 24999) : ((cfg.activePlanName || "").toLowerCase().includes("local") ? (cfg.standardPrice || 1999) : (cfg.monthlyPrice || 4999));
+      const token = await computeSha256Token("AUTOPAY_RENEW_" + Date.now());
+      cfg.licenseExpiresAt = Date.now() + cycleDays * 86400000;
+      cfg.paywallUnlocked = true;
+      cfg.activePurchaseVerified = true;
+
+      recordLicenseSaleInLedger({
+        clinicName: cfg.brandName || "Zero-Line Clinic Subscriber",
+        buyerEmail: (cfg.googleUser && cfg.googleUser.email) || "autopay@clinic.com",
+        planName: (cfg.activePlanName || "Gold Clinic Cloud Plan") + " (AutoPay Renewal)",
+        amount: amount,
+        method: "Seamless AutoPay Mandate",
+        encryptedToken: token,
+        autoPay: true,
+        cycleDays: cycleDays
+      });
+
+      saveState();
+      renderAll();
+      renderMasterSettingsModal();
+      showToast(`✓ AutoPay deducted ${cfg.currency || "₹"}${amount.toLocaleString()} (${token}) & extended license by +${cycleDays} days seamlessly!`);
+    }
+
+    function getVendorSalesLedger() {
+      if (!state.vendorSalesLedger || !Array.isArray(state.vendorSalesLedger)) {
+        state.vendorSalesLedger = [
+          {
+            id: "LIC-1001",
+            clinicName: "City Care Polyclinic",
+            buyerEmail: "dr.mehta@citycare.in",
+            planName: "Gold Clinic Cloud Plan",
+            amount: 4999,
+            method: "UPI / QR Instant Pay (Encrypted)",
+            encryptedToken: "ENC-SHA256-9A4C2E11F0 (••82)",
+            autoPay: true,
+            status: "ACTIVE",
+            date: "2026-10-25",
+            expiresAt: Date.now() + 17 * 86400000
+          },
+          {
+            id: "LIC-1002",
+            clinicName: "Apex Ortho & Pharmacy Center",
+            buyerEmail: "admin@apexortho.com",
+            planName: "Platinum / Premium Custom Plan",
+            amount: 24999,
+            method: "Card Tokenized Pay",
+            encryptedToken: "ENC-SHA256-3F8B0D74A1 (••19)",
+            autoPay: true,
+            status: "ACTIVE",
+            date: "2026-11-02",
+            expiresAt: Date.now() + 360 * 86400000
+          }
+        ];
+      }
+      return state.vendorSalesLedger;
+    }
+
+    function recordLicenseSaleInLedger(entry) {
+      const ledger = getVendorSalesLedger();
+      const cycleDays = entry.cycleDays || (String(entry.planName || "").toLowerCase().includes("platinum") ? 365 : 30);
+      ledger.unshift({
+        id: "LIC-" + (1000 + ledger.length + 1),
+        clinicName: entry.clinicName || "Clinic Customer",
+        buyerEmail: entry.buyerEmail || "clinic@gmail.com",
+        planName: entry.planName || "Gold Clinic Cloud Plan",
+        amount: Number(entry.amount) || 4999,
+        method: entry.method || "UPI Encrypted",
+        encryptedToken: entry.encryptedToken || "ENC-SHA256-VERIFIED",
+        autoPay: Boolean(entry.autoPay),
+        status: "ACTIVE",
+        date: new Date().toISOString().slice(0, 10),
+        expiresAt: Date.now() + cycleDays * 86400000
+      });
+    }
+
+    function toggleLicenseRevokeStatus(licId) {
+      const ledger = getVendorSalesLedger();
+      const item = ledger.find((l) => l.id === licId);
+      if (!item) return;
+      item.status = item.status === "REVOKED" ? "ACTIVE" : "REVOKED";
+      // If revoking current clinic's active license, lock back to paywall
+      if (state.saasConfig && state.saasConfig.brandName === item.clinicName && item.status === "REVOKED") {
+        state.saasConfig.paywallUnlocked = false;
+        state.saasConfig.activePurchaseVerified = false;
+      }
+      saveState();
+      renderMasterSettingsModal();
+      renderStorefrontPaywallState();
+      showToast(item.status === "REVOKED" ? `⛔ Revoked license ${licId} (${item.clinicName}).` : `✓ Restored license ${licId} (${item.clinicName}).`);
+    }
+
+    function extendClinicLicenseDays(licId, extraDays) {
+      const ledger = getVendorSalesLedger();
+      const item = ledger.find((l) => l.id === licId);
+      if (!item) return;
+      item.expiresAt = Math.max(Date.now(), item.expiresAt || Date.now()) + extraDays * 86400000;
+      item.status = "ACTIVE";
+      if (state.saasConfig && state.saasConfig.brandName === item.clinicName) {
+        state.saasConfig.licenseExpiresAt = item.expiresAt;
+        state.saasConfig.paywallUnlocked = true;
+        state.saasConfig.activePurchaseVerified = true;
+      }
+      saveState();
+      renderMasterSettingsModal();
+      renderStorefrontPaywallState();
+      showToast(`✓ Extended ${item.clinicName} (${licId}) by +${extraDays} days.`);
+    }
+
+    function exportVendorSalesCsv() {
+      const ledger = getVendorSalesLedger();
+      const rows = [
+        ["License ID", "Clinic Name", "Buyer Gmail", "Plan", "Amount Paid", "AutoPay", "Status", "Encrypted Token", "Date"]
+      ];
+      ledger.forEach((l) => {
+        rows.push([l.id, l.clinicName, l.buyerEmail, l.planName, l.amount, l.autoPay ? "YES" : "NO", l.status, l.encryptedToken, l.date]);
+      });
+      const csv = rows.map((r) => r.map((c) => `"${String(c || "").replace(/"/g, '""')}"`).join(",")).join("\n");
+      const a = document.createElement("a");
+      a.href = "data:text/csv;charset=utf-8," + encodeURIComponent(csv);
+      a.download = "zero_line_vendor_sales_income.csv";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      showToast("Exported Vendor Sales & Income CSV ledger.");
+    }
+
+    async function verifyGoogleAuthenticatorCode(context) {
+      const inputEl = document.getElementById("settingsTotpInput");
+      const entered = inputEl ? inputEl.value.trim() : "";
+      const ok = await isValidRoleTotpCode(entered, "admin", ["2569", "1989"]);
+      if (!ok) {
+        showToast("Invalid Master Admin Authenticator 6-digit code. Use your #4 Master Admin key.");
+        return;
+      }
+      if (inputEl) inputEl.value = "";
+      unlockedRoles.doctor = true;
+      unlockedRoles.saas = true;
+      updatePinLockBadge();
+      renderMasterSettingsModal();
+      showToast("✓ Google Authenticator verified! Vendor Sales & Income Dashboard unlocked.");
+    }
+
+    function renderMasterSettingsModal() {
+      const cfg = state.saasConfig || {};
+      updateTotpEnrollmentUi();
+      refreshLiveTotpPreviewCode();
+      const cur = cfg.currency || "₹";
+      applySavedWebsiteTheme();
+
+      const chimeEl = document.getElementById("audioChimeToggleInput");
+      if (chimeEl) chimeEl.checked = !cfg.audioChimeMuted;
+
+      const sigEl = document.getElementById("doctorSignatureInput");
+      if (sigEl && cfg.doctorSignature) sigEl.value = cfg.doctorSignature;
+
+      const apEl = document.getElementById("settingsAutoPayToggle");
+      if (apEl) apEl.checked = Boolean(cfg.autoPayEnabled);
+
+      const daysLeft = cfg.licenseExpiresAt ? Math.max(0, Math.ceil((cfg.licenseExpiresAt - Date.now()) / 86400000)) : 30;
+      const subText = document.getElementById("settingsSubscriptionStatusText");
+      if (subText) {
+        subText.textContent = cfg.paywallUnlocked
+          ? `Active Plan: ${cfg.activePlanName || "Gold Plan"} • ${daysLeft} day(s) remaining • AutoPay: ${cfg.autoPayEnabled ? "ON (Seamless Renewal)" : "OFF"}`
+          : "Unlicensed Preview Mode • Complete paywall checkout to activate.";
+      }
+
+      const ledgerBox = document.getElementById("vendorSalesAndIncomeLedgerBox");
+      const badge = document.getElementById("totpAdminStatusBadge");
+      if (ledgerBox && badge) {
+        if (unlockedRoles.saas) {
+          ledgerBox.classList.remove("hidden");
+          badge.className = "text-xs font-mono px-2.5 py-1 rounded-lg bg-emerald-950 border border-emerald-800 text-emerald-300";
+          badge.textContent = "✓ Authenticator Verified • Vendor Admin Unlocked";
+        } else {
+          ledgerBox.classList.add("hidden");
+          badge.className = "text-xs font-mono px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-800 text-amber-300";
+          badge.textContent = "Locked • Enter 6-Digit Authenticator Code";
+        }
+      }
+
+      // Render Vendor Sales & Income metrics
+      const ledger = getVendorSalesLedger();
+      const activeSales = ledger.filter((l) => l.status !== "REVOKED");
+      const totalIncome = activeSales.reduce((acc, l) => acc + (Number(l.amount) || 0), 0);
+      const localCnt = activeSales.filter((l) => l.planName.toLowerCase().includes("local")).length;
+      const goldCnt = activeSales.filter((l) => l.planName.toLowerCase().includes("gold")).length;
+      const platCnt = activeSales.filter((l) => l.planName.toLowerCase().includes("platinum")).length;
+      const autoPayCnt = activeSales.filter((l) => l.autoPay).length;
+
+      const elSold = document.getElementById("vendorTotalSoldCount");
+      if (elSold) elSold.textContent = String(activeSales.length);
+      const elBreak = document.getElementById("vendorSoldBreakdownText");
+      if (elBreak) elBreak.textContent = `${localCnt} Local • ${goldCnt} Gold • ${platCnt} Platinum`;
+      const elInc = document.getElementById("vendorTotalIncomeAmount");
+      if (elInc) elInc.textContent = `${cur}${totalIncome.toLocaleString()}`;
+      const elAp = document.getElementById("vendorAutoPayActiveCount");
+      if (elAp) elAp.textContent = `${autoPayCnt} / ${activeSales.length} Clinics`;
+
+      const tbl = document.getElementById("vendorSalesTableContainer");
+      if (tbl) {
+        tbl.innerHTML = `
+          <table class="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr class="bg-slate-900 text-slate-300 border-b border-slate-800">
+                <th class="py-2 px-3">ID & Clinic</th>
+                <th class="py-2 px-3">Plan & AutoPay</th>
+                <th class="py-2 px-3">Amount</th>
+                <th class="py-2 px-3">Encrypted Vault Token</th>
+                <th class="py-2 px-3">Days Left</th>
+                <th class="py-2 px-3 text-right">Remote Control</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${ledger.map((l) => {
+                const rem = l.expiresAt ? Math.max(0, Math.ceil((l.expiresAt - Date.now()) / 86400000)) : 30;
+                const isRev = l.status === "REVOKED";
+                return `
+                  <tr class="border-b border-slate-800/80 ${isRev ? 'opacity-60 bg-rose-950/20' : ''}">
+                    <td class="py-2 px-3">
+                      <div class="font-bold text-slate-100">${escapeHtml(l.clinicName)} <span class="font-mono text-[10px] text-teal-400">(${l.id})</span></div>
+                      <div class="text-[11px] text-slate-400">${escapeHtml(l.buyerEmail)}</div>
+                    </td>
+                    <td class="py-2 px-3">
+                      <div class="font-semibold text-slate-200">${escapeHtml(l.planName)}</div>
+                      <span class="text-[10px] font-bold ${l.autoPay ? 'text-emerald-400' : 'text-slate-400'}">${l.autoPay ? '↻ AutoPay Active' : 'Manual Renewal'}</span>
+                    </td>
+                    <td class="py-2 px-3 font-mono font-bold text-emerald-400">${cur}${Number(l.amount).toLocaleString()}</td>
+                    <td class="py-2 px-3 font-mono text-[11px] text-slate-300">${escapeHtml(l.encryptedToken)}</td>
+                    <td class="py-2 px-3 font-mono">${isRev ? '<span class="text-rose-400 font-bold">REVOKED</span>' : `${rem}d`}</td>
+                    <td class="py-2 px-3 text-right space-x-1">
+                      <button type="button" onclick="extendClinicLicenseDays('${l.id}', 30)" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-teal-300 border border-slate-700 font-bold text-[10px]">+30d</button>
+                      <button type="button" onclick="toggleLicenseRevokeStatus('${l.id}')" class="px-2 py-1 rounded ${isRev ? 'bg-emerald-700 text-white' : 'bg-rose-950 text-rose-300 border border-rose-800'} font-bold text-[10px]">
+                        ${isRev ? 'Restore' : 'Revoke'}
+                      </button>
+                    </td>
+                  </tr>
+                `;
+              }).join("")}
+            </tbody>
+          </table>
+        `;
+      }
+    }
+
     // --- Cryptographic Zero-Leak Payment Vault (SHA-256 Tokenization + Masking) ---
     async function computeSha256Token(rawInput) {
       const clean = String(rawInput || "").trim();
@@ -2600,11 +3535,11 @@ ${statusAdvice}`;
       return `ENC-VAULT-${hexFallback} (••${last2})`;
     }
 
-    function verifyDirectAdminDemoCode() {
+    async function verifyDirectAdminDemoCode() {
       const entered = (document.getElementById("directAdminDemoCodeInput").value || "").trim();
-      // Secret code 1989 (or 2569) grants immediate direct Admin / Demo access to the full software
-      if (entered !== "1989" && entered !== "2569") {
-        showToast("Invalid Admin Demo Key. Access denied.");
+      const ok = await isValidRoleTotpCode(entered, "demo", ["1989"]);
+      if (!ok) {
+        showToast("Invalid Live Demo Authenticator code (or Demo Key).");
         return;
       }
       document.getElementById("directAdminDemoCodeInput").value = "";
@@ -2618,7 +3553,7 @@ ${statusAdvice}`;
       saveState();
       closeStorefrontGate();
       renderAll();
-      showToast("Admin Demo Mode unlocked! After showing the demo, click '← Back to Paywall Page' in the top bar so the customer can pay.");
+      showToast("Admin Demo Mode unlocked via Authenticator! Click '← Back to Paywall Page' after the demo so the customer can pay.");
     }
 
     function toggleCheckoutMethodFields(methodVal) {
@@ -2650,18 +3585,18 @@ ${statusAdvice}`;
       if (gate) gate.classList.add("hidden");
     }
 
-    function verifyPlatinumSpecialKey() {
+    async function verifyPlatinumSpecialKey() {
       const entered = (document.getElementById("platinumKeyInput").value || "").trim();
-      // Special key 2010 strictly required to unlock the Platinum custom pricing paywall
-      if (entered !== "2010") {
-        showToast("Invalid Special Key. Only the vendor can unlock the Platinum / Premium custom payment paywall.");
+      const ok = await isValidRoleTotpCode(entered, "platinum", ["2010"]);
+      if (!ok) {
+        showToast("Invalid Google Authenticator code or Special Key. Only the vendor can unlock custom Platinum pricing.");
         return;
       }
       if (!state.saasConfig) state.saasConfig = {};
       state.saasConfig.platinumKeyUnlocked = true;
       document.getElementById("platinumKeyInput").value = "";
       renderStorefrontPaywallState();
-      showToast("Platinum Authorization Key verified! Custom rate & storage paywall unlocked.");
+      showToast("✓ Authenticator / Special Key verified! Custom Platinum payment paywall unlocked.");
     }
 
     function lockPlatinumCustomBox() {
@@ -2694,6 +3629,12 @@ ${statusAdvice}`;
       document.getElementById("checkoutSummaryPlan").textContent = planName;
       document.getElementById("checkoutSummaryQuota").textContent = quotaText;
       document.getElementById("checkoutSummaryAmount").textContent = `${cur}${Number(amount).toLocaleString()}`;
+      const cycEl = document.getElementById("checkoutAutoPayCycleLabel");
+      if (cycEl) {
+        cycEl.textContent = String(planName || "").toLowerCase().includes("platinum")
+          ? `every 1 year (365 days) at ${cur}${Number(amount).toLocaleString()}`
+          : `every 30 days at ${cur}${Number(amount).toLocaleString()}`;
+      }
 
       const gu = state.saasConfig && state.saasConfig.googleUser;
       if (gu && gu.email) {
@@ -2719,13 +3660,12 @@ ${statusAdvice}`;
       let encryptedAuditToken = "";
       if (isCash) {
         const cashCode = (document.getElementById("checkoutCashAuthCodeInput").value || "").trim();
-        // Secret Cash Code 1981 strictly required to authorize Cash Payment
-        if (cashCode !== "1981") {
-          showToast("Invalid Vendor Cash Authorization Code. Cash payment cannot be verified without the vendor code.");
+        const cashOk = await isValidRoleTotpCode(cashCode, "cash", ["1981"]);
+        if (!cashOk) {
+          showToast("Invalid Google Authenticator or Vendor Cash Code. Cash payment cannot be verified.");
           return;
         }
         encryptedAuditToken = await computeSha256Token("CASH_AUTH_" + Date.now());
-        // Immediately wipe cash code input from DOM
         document.getElementById("checkoutCashAuthCodeInput").value = "";
       } else {
         const rawRef = (document.getElementById("checkoutTransactionRef").value || "").trim();
@@ -2738,13 +3678,30 @@ ${statusAdvice}`;
         document.getElementById("checkoutTransactionRef").value = "";
       }
 
+      const autoPayChecked = document.getElementById("checkoutAutoPayCheckbox") ? document.getElementById("checkoutAutoPayCheckbox").checked : true;
+      const isPlatinumPlan = String(selectedCheckoutPlan.name || "").toLowerCase().includes("platinum");
+      const cycleDays = isPlatinumPlan ? 365 : 30;
+
       if (!state.saasConfig) state.saasConfig = {};
       if (clinicName) state.saasConfig.brandName = clinicName;
       state.saasConfig.paywallUnlocked = true;
       state.saasConfig.activePurchaseVerified = true;
       state.saasConfig.activePlanName = selectedCheckoutPlan.name;
       state.saasConfig.activePlanQuota = selectedCheckoutPlan.quota;
+      state.saasConfig.autoPayEnabled = autoPayChecked;
+      state.saasConfig.licenseExpiresAt = Date.now() + cycleDays * 86400000;
       state.saasConfig.lastPaymentRef = `${method} [${encryptedAuditToken}]`;
+
+      recordLicenseSaleInLedger({
+        clinicName: clinicName || "Clinic Subscriber",
+        buyerEmail: buyerEmail,
+        planName: selectedCheckoutPlan.name,
+        amount: selectedCheckoutPlan.amount,
+        method: method,
+        encryptedToken: encryptedAuditToken,
+        autoPay: autoPayChecked,
+        cycleDays: cycleDays
+      });
       state.saasConfig.googleUser = {
         name: clinicName || "Clinic Subscriber",
         email: buyerEmail,
@@ -2792,7 +3749,11 @@ ${statusAdvice}`;
 
       const elBadge = document.getElementById("activePlanBadgeText");
       if (elBadge) {
-        elBadge.textContent = cfg.paywallUnlocked ? (cfg.activePlanName || "Gold Plan Active") : "Preview Mode (Paywall Active)";
+        const remDays = cfg.licenseExpiresAt ? Math.max(1, Math.ceil((cfg.licenseExpiresAt - Date.now()) / 86400000)) : 30;
+        const apTag = cfg.autoPayEnabled ? " • AutoPay ON" : "";
+        elBadge.textContent = cfg.paywallUnlocked
+          ? `${cfg.activePlanName || "Gold Plan"} (${remDays}d${apTag})`
+          : "Preview Mode (Paywall Active)";
       }
 
       const elLicense = document.getElementById("licenseBadge");
@@ -2894,6 +3855,11 @@ ${statusAdvice}`;
               </div>
             </div>
             <div class="flex flex-wrap items-center gap-2">
+              ${!isConsult ? `
+                <button type="button" onclick="toggleEmergencyPriority('${item.token}')" class="px-2.5 py-1.5 rounded-lg ${item.priority ? 'bg-rose-600 text-white' : 'bg-slate-950 hover:bg-slate-800 text-rose-300 border border-rose-800/80'} text-xs font-bold">
+                  ${item.priority ? '⚡ Priority Active' : '⚡ Priority'}
+                </button>
+              ` : ''}
               <button type="button" onclick="sendRealWhatsApp('${item.token}')" class="px-2.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-bold shadow-sm">
                 📲 Send WhatsApp
               </button>
@@ -2975,9 +3941,38 @@ ${statusAdvice}`;
 
     function renderFrontDeskBilling() {
       const container = document.getElementById("frontDeskBillingList");
+      const tallyBar = document.getElementById("frontDeskDailySettlementBar");
       if (!container) return;
       const cur = state.saasConfig.currency;
       const items = state.queue.filter((q) => q.status === "PHARMACY_READY" || q.status === "COMPLETED");
+
+      if (tallyBar) {
+        const paidItems = items.filter((i) => i.paid);
+        const unpaidItems = items.filter((i) => !i.paid);
+        const consultCollected = paidItems.reduce((s, i) => s + (i.consultFee || 500), 0);
+        const medCollected = paidItems.reduce((s, i) => s + (i.medicines || []).reduce((mSum, m) => mSum + m.price, 0), 0);
+        const totalCollected = consultCollected + medCollected;
+        const pendingTotal = unpaidItems.reduce((s, i) => s + (i.consultFee || 500) + (i.medicines || []).reduce((mSum, m) => mSum + m.price, 0), 0);
+
+        tallyBar.innerHTML = `
+          <div>
+            <span class="text-slate-400 block">Today's Total Collected</span>
+            <strong class="text-base font-extrabold font-mono text-emerald-400">${cur}${totalCollected.toLocaleString()}</strong>
+          </div>
+          <div>
+            <span class="text-slate-400 block">Consultation Fees</span>
+            <strong class="text-sm font-bold font-mono text-slate-200">${cur}${consultCollected.toLocaleString()}</strong>
+          </div>
+          <div>
+            <span class="text-slate-400 block">Pharmacy Medicines</span>
+            <strong class="text-sm font-bold font-mono text-teal-300">${cur}${medCollected.toLocaleString()}</strong>
+          </div>
+          <div>
+            <span class="text-slate-400 block">Pending Unpaid (${unpaidItems.length})</span>
+            <strong class="text-sm font-bold font-mono text-amber-400">${cur}${pendingTotal.toLocaleString()}</strong>
+          </div>
+        `;
+      }
 
       if (items.length === 0) {
         container.innerHTML = `<div class="p-4 text-center text-xs text-slate-500 border border-dashed border-slate-800 rounded-xl">No completed consultations awaiting payment yet.</div>`;
@@ -3031,6 +4026,7 @@ ${statusAdvice}`;
       const power = document.getElementById("newMedPowerInput").value.trim();
       const unitPrice = parseInt(document.getElementById("newMedPriceInput").value, 10) || 30;
       const stock = parseInt(document.getElementById("newMedStockInput").value, 10) || 0;
+      const expiry = (document.getElementById("newMedExpiryInput") ? document.getElementById("newMedExpiryInput").value.trim() : "") || "12/2027";
       const minStock = parseInt(document.getElementById("newMedMinAlertInput").value, 10) || 10;
 
       const list = getFormulary();
@@ -3044,7 +4040,8 @@ ${statusAdvice}`;
         activeClass: "Clinic Formulary",
         unitPrice,
         stock,
-        minStock
+        minStock,
+        expiry
       });
 
       saveState();
@@ -3140,6 +4137,7 @@ ${statusAdvice}`;
               <th class="py-2.5 px-3">Power</th>
               <th class="py-2.5 px-3">Price (${cur})</th>
               <th class="py-2.5 px-3">Available Stock</th>
+              <th class="py-2.5 px-3">Expiry (MM/YYYY)</th>
               <th class="py-2.5 px-3">Reminder Alert At ≤</th>
               <th class="py-2.5 px-3">Status</th>
               <th class="py-2.5 px-3 text-right">Quick Restock</th>
@@ -3163,6 +4161,9 @@ ${statusAdvice}`;
                   </td>
                   <td class="py-2 px-3">
                     <input type="number" min="0" value="${m.stock}" onchange="updateMedicineField('${m.id}', 'stock', this.value)" class="w-20 rounded-lg border border-slate-800 px-2 py-1 text-xs font-mono font-bold" />
+                  </td>
+                  <td class="py-2 px-3">
+                    <input type="text" value="${escapeHtml(m.expiry || '12/2027')}" onchange="updateMedicineField('${m.id}', 'expiry', this.value)" class="w-24 rounded-lg border border-slate-800 px-2 py-1 text-xs font-mono" />
                   </td>
                   <td class="py-2 px-3">
                     <input type="number" min="1" value="${minLim}" onchange="updateMedicineField('${m.id}', 'minStock', this.value)" class="w-20 rounded-lg border border-slate-800 px-2 py-1 text-xs font-mono" title="Customize minimum stock reminder for this medicine" />
@@ -3384,9 +4385,25 @@ ${statusAdvice}`;
       if (state.saasConfig && state.saasConfig.googleUser && state.saasConfig.googleUser.signedIn) {
         applyGoogleRolePermissions(state.saasConfig.googleUser.roleKey);
       }
+      applySavedWebsiteTheme();
+      // Check subscription expiry & seamless AutoPay renewal
+      if (state.saasConfig && state.saasConfig.licenseExpiresAt && Date.now() > state.saasConfig.licenseExpiresAt) {
+        if (state.saasConfig.autoPayEnabled) {
+          simulateAutoPayCycleNow();
+        } else {
+          state.saasConfig.paywallUnlocked = false;
+          state.saasConfig.activePurchaseVerified = false;
+        }
+      }
       renderAll();
       previewWhatsAppToken("T-102");
-      if (!state.saasConfig || !state.saasConfig.paywallUnlocked) {
+      // Detect if opened via a Patient WhatsApp Live Tracker link (?track=T-XXX)
+      const urlParams = new URLSearchParams(window.location.search || "");
+      const trackToken = urlParams.get("track");
+      if (trackToken) {
+        closeStorefrontGate();
+        openPatientTrackerPreview(trackToken);
+      } else if (!state.saasConfig || !state.saasConfig.paywallUnlocked) {
         openStorefrontGate();
       } else {
         closeStorefrontGate();
