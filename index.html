@@ -1186,7 +1186,7 @@
           <span class="w-9 h-9 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-lg">⚙️</span>
           <div>
             <h2 class="font-bold text-base text-slate-100">Clinic Settings, Appearance, Cloud Sync & Vendor Portal</h2>
-            <p class="text-xs text-slate-400">Customize Dark/Light theme, 15 TB Google Drive sync, AutoPay status, or unlock Vendor Sales with Google Authenticator</p>
+            <p class="text-xs text-slate-400">Customize Dark/Light theme, 5 TB Google Drive sync, AutoPay status, or unlock Vendor Sales with Google Authenticator</p>
           </div>
         </div>
         <button id="closeMasterSettingsBtn" type="button" onclick="closeMasterSettingsModal()" class="text-slate-400 hover:text-white font-bold text-base">✕</button>
@@ -1219,7 +1219,7 @@
           <div class="font-bold text-teal-400 uppercase tracking-wider">3. Clinic Directories & Tools</div>
           <div class="grid grid-cols-2 gap-1.5">
             <button type="button" onclick="closeMasterSettingsModal(); switchTab('cloud', true);" class="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 font-semibold text-left">📂 Cloud ID Directory</button>
-            <button type="button" onclick="closeMasterSettingsModal(); openCloudSyncModal();" class="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-teal-300 font-semibold text-left">☁️ 15TB Drive Sync</button>
+            <button type="button" onclick="closeMasterSettingsModal(); openCloudSyncModal();" class="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-teal-300 font-semibold text-left">☁️ 5TB Drive Sync</button>
             <button type="button" onclick="closeMasterSettingsModal(); openInstallModal();" class="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 font-semibold text-left">💻 Install on Any OS</button>
             <button type="button" onclick="exportCloudData()" class="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 font-semibold text-left">⬇️ Export Backup</button>
             <button type="button" onclick="closeMasterSettingsModal(); switchTab('about', true);" class="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-200 font-semibold text-left">📞 About & Contact</button>
@@ -1289,117 +1289,15 @@
             </div>
           </div>
 
-          <!-- 4-Channel Google Authenticator QR & Secret Key Manager (Privilege Separation) -->
-          <div class="p-4 rounded-xl bg-slate-900 border border-teal-800/80 text-xs space-y-4">
-            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2.5">
-              <div>
-                <strong class="text-teal-300 text-sm block">📱 4-Role Google Authenticator Manager (Dedicated Key & QR per Task)</strong>
-                <span class="text-[11px] text-slate-400">Scan all 4 QR codes into your Google Authenticator app (or share only the Demo / Cash QR with field sales agents without exposing your Master Admin Ledger).</span>
-              </div>
-              <button id="refreshAll4TotpCodesBtn" type="button" onclick="refreshAllFourTotpPreviews()" class="px-3 py-1.5 rounded-lg bg-slate-950 hover:bg-slate-800 text-teal-300 border border-slate-700 font-bold text-[11px]">
-                ↻ Refresh All 4 Live 6-Digit Codes
-              </button>
+          <!-- Sealed 4-Channel Google Authenticator Status (QR Codes & Setup Keys Permanently Removed from UI) -->
+          <div class="p-3.5 rounded-xl bg-slate-900 border border-teal-800/80 flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div>
+              <strong class="text-teal-300">🛡️ 4-Channel Google Authenticator Hardware Lock: PAIRED & SEALED</strong>
+              <p class="text-[11px] text-slate-400">All 4 QR codes, Base32 setup keys, and live code previews have been permanently removed from the website UI so no customer can ever view or scan your keys.</p>
             </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <!-- Backward-compatible hidden hooks for single-key references -->
-              <div class="hidden">
-                <img id="totpQrCodeImg" src="" alt="" />
-                <input id="customTotpSecretInput" type="text" value="JBSWY3DPEHPK3PXP" />
-                <code id="totpSecretBase32Display">JBSWY3DPEHPK3PXP</code>
-                <strong id="liveExpectedTotpPreview">------</strong>
-                <button id="generateNewTotpSecretBtn" type="button" onclick="rollRoleTotpSecret('admin')">🎲 Generate New Key</button>
-                <button id="saveCustomTotpSecretBtn" type="button" onclick="saveRoleTotpSecret('admin')">Save & Update QR</button>
-                <button id="refreshLiveTotpPreviewBtn" type="button" onclick="refreshAllFourTotpPreviews()">↻ Show Current 6-Digit Code</button>
-              </div>
-              <!-- KEY 1: LIVE DEMO ACCESS -->
-              <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 flex gap-3 items-center">
-                <div class="p-2 rounded-lg bg-white shrink-0">
-                  <img id="totpQrImg-demo" src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=otpauth%3A%2F%2Ftotp%2FZeroLine%3A1_Live_Demo%3Fsecret%3DJBSWY3DPEHPK3PXA%26issuer%3DZeroLine" alt="QR Code for Live Demo Access" class="w-24 h-24 object-contain" />
-                </div>
-                <div class="space-y-1.5 flex-1 min-w-0">
-                  <div class="flex items-center justify-between">
-                    <strong class="text-teal-300">1. Live Demo Access Key</strong>
-                    <span class="text-[10px] font-mono text-slate-400">Storefront Bypass</span>
-                  </div>
-                  <div class="flex gap-1.5">
-                    <input id="totpInputKey-demo" type="text" value="JBSWY3DPEHPK3PXA" class="w-full rounded-lg border border-slate-800 px-2 py-1 text-[11px] font-mono uppercase text-amber-300" />
-                    <button type="button" onclick="rollRoleTotpSecret('demo')" title="Generate New Key" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold">🎲</button>
-                    <button type="button" onclick="saveRoleTotpSecret('demo')" class="px-2.5 py-1 rounded bg-teal-600 hover:bg-teal-500 text-white font-bold">Save</button>
-                  </div>
-                  <div class="text-[11px] text-slate-400 flex justify-between">
-                    <span>Setup Key: <code id="totpLabelKey-demo" class="text-slate-200 font-mono select-all">JBSWY3DPEHPK3PXA</code></span>
-                    <span>Now: <strong id="totpLiveCode-demo" class="font-mono text-emerald-400">------</strong></span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- KEY 2: PLATINUM CUSTOM RATE PAYWALL -->
-              <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 flex gap-3 items-center">
-                <div class="p-2 rounded-lg bg-white shrink-0">
-                  <img id="totpQrImg-platinum" src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=otpauth%3A%2F%2Ftotp%2FZeroLine%3A2_Platinum_Rate%3Fsecret%3DKRSXG5CTMVRXEZLU%26issuer%3DZeroLine" alt="QR Code for Platinum Custom Rate" class="w-24 h-24 object-contain" />
-                </div>
-                <div class="space-y-1.5 flex-1 min-w-0">
-                  <div class="flex items-center justify-between">
-                    <strong class="text-amber-300">2. Platinum Custom Rate Key</strong>
-                    <span class="text-[10px] font-mono text-slate-400">Custom Paywall</span>
-                  </div>
-                  <div class="flex gap-1.5">
-                    <input id="totpInputKey-platinum" type="text" value="KRSXG5CTMVRXEZLU" class="w-full rounded-lg border border-slate-800 px-2 py-1 text-[11px] font-mono uppercase text-amber-300" />
-                    <button type="button" onclick="rollRoleTotpSecret('platinum')" title="Generate New Key" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold">🎲</button>
-                    <button type="button" onclick="saveRoleTotpSecret('platinum')" class="px-2.5 py-1 rounded bg-teal-600 hover:bg-teal-500 text-white font-bold">Save</button>
-                  </div>
-                  <div class="text-[11px] text-slate-400 flex justify-between">
-                    <span>Setup Key: <code id="totpLabelKey-platinum" class="text-slate-200 font-mono select-all">KRSXG5CTMVRXEZLU</code></span>
-                    <span>Now: <strong id="totpLiveCode-platinum" class="font-mono text-emerald-400">------</strong></span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- KEY 3: CASH PAYMENT VERIFICATION -->
-              <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 flex gap-3 items-center">
-                <div class="p-2 rounded-lg bg-white shrink-0">
-                  <img id="totpQrImg-cash" src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=otpauth%3A%2F%2Ftotp%2FZeroLine%3A3_Cash_Payment%3Fsecret%3DMFRGGZDFMZTWQ2LK%26issuer%3DZeroLine" alt="QR Code for Cash Payment Auth" class="w-24 h-24 object-contain" />
-                </div>
-                <div class="space-y-1.5 flex-1 min-w-0">
-                  <div class="flex items-center justify-between">
-                    <strong class="text-emerald-300">3. Cash Payment Auth Key</strong>
-                    <span class="text-[10px] font-mono text-slate-400">Checkout Cash Gate</span>
-                  </div>
-                  <div class="flex gap-1.5">
-                    <input id="totpInputKey-cash" type="text" value="MFRGGZDFMZTWQ2LK" class="w-full rounded-lg border border-slate-800 px-2 py-1 text-[11px] font-mono uppercase text-amber-300" />
-                    <button type="button" onclick="rollRoleTotpSecret('cash')" title="Generate New Key" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold">🎲</button>
-                    <button type="button" onclick="saveRoleTotpSecret('cash')" class="px-2.5 py-1 rounded bg-teal-600 hover:bg-teal-500 text-white font-bold">Save</button>
-                  </div>
-                  <div class="text-[11px] text-slate-400 flex justify-between">
-                    <span>Setup Key: <code id="totpLabelKey-cash" class="text-slate-200 font-mono select-all">MFRGGZDFMZTWQ2LK</code></span>
-                    <span>Now: <strong id="totpLiveCode-cash" class="font-mono text-emerald-400">------</strong></span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- KEY 4: MASTER ADMIN & INCOME LEDGER -->
-              <div class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 flex gap-3 items-center">
-                <div class="p-2 rounded-lg bg-white shrink-0">
-                  <img id="totpQrImg-admin" src="https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=otpauth%3A%2F%2Ftotp%2FZeroLine%3A4_Master_Admin%3Fsecret%3DJBSWY3DPEHPK3PXP%26issuer%3DZeroLine" alt="QR Code for Master Admin Ledger" class="w-24 h-24 object-contain" />
-                </div>
-                <div class="space-y-1.5 flex-1 min-w-0">
-                  <div class="flex items-center justify-between">
-                    <strong class="text-rose-300">4. Master Admin & Income Key</strong>
-                    <span class="text-[10px] font-mono text-slate-400">Sales & Kill-Switch</span>
-                  </div>
-                  <div class="flex gap-1.5">
-                    <input id="totpInputKey-admin" type="text" value="JBSWY3DPEHPK3PXP" class="w-full rounded-lg border border-slate-800 px-2 py-1 text-[11px] font-mono uppercase text-amber-300" />
-                    <button type="button" onclick="rollRoleTotpSecret('admin')" title="Generate New Key" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold">🎲</button>
-                    <button type="button" onclick="saveRoleTotpSecret('admin')" class="px-2.5 py-1 rounded bg-teal-600 hover:bg-teal-500 text-white font-bold">Save</button>
-                  </div>
-                  <div class="text-[11px] text-slate-400 flex justify-between">
-                    <span>Setup Key: <code id="totpLabelKey-admin" class="text-slate-200 font-mono select-all">JBSWY3DPEHPK3PXP</code></span>
-                    <span>Now: <strong id="totpLiveCode-admin" class="font-mono text-emerald-400">------</strong></span>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <button type="button" onclick="lockAllRolesNow(); closeMasterSettingsModal();" class="px-3 py-1.5 rounded-lg bg-rose-950 hover:bg-rose-900 text-rose-200 border border-rose-800 font-bold text-[11px]">
+              🔒 Lock Vendor Admin Now
+            </button>
           </div>
 
           <!-- Sold Software Licenses & Remote Kill-Switch Table -->
@@ -3404,7 +3302,7 @@ function doPost(e){var f=DriveApp.getRootFolder().getFilesByName("zeroline_db.js
       }
       if (inputEl) inputEl.value = "";
       unlockedRoles.doctor = true;
-      unlockedRoles.saas = true;
+      unlockedRoles.saas = false;
       updatePinLockBadge();
       renderMasterSettingsModal();
       showToast("✓ Google Authenticator verified! Vendor Sales & Income Dashboard unlocked.");
