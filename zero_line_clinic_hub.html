@@ -8,6 +8,7 @@
   <meta name="description" content="Eliminate crowded clinic waiting rooms, paper record chaos, and prescription errors with Zero-Line Clinic Hub: Cloud Patient IDs, WhatsApp Tokens & 1-Stop Pharmacy." />
   <meta name="keywords" content="Clinic Management Software, Cloud EHR, Live WhatsApp Token Queue, Digital Prescription Software, Pharmacy Billing POS" />
   <meta name="robots" content="index, follow" />
+  <meta name="referrer" content="no-referrer" />
   <meta property="og:title" content="Zero-Line Clinic Hub — Cloud EHR & Queue System" />
   <meta property="og:description" content="Unified Front Desk, Doctor Tablet EHR, and Paid-Only Pharmacy Dispatch for modern medical clinics." />
   <meta property="og:type" content="website" />
@@ -521,7 +522,7 @@
               <div>
                 <label class="block text-xs font-semibold text-slate-300 mb-1">Vitals & Weight (kg)</label>
                 <div class="grid grid-cols-2 gap-1.5">
-                  <input id="formVitals" type="text" placeholder="120/80, 98.6°F" class="w-full rounded-xl border border-slate-800 px-2 py-2 text-xs" />
+                  <input id="formVitals" type="text" placeholder="120/80, 98.6°F, SpO2 98%" title="BP (mmHg), Temp (°F), SpO2 (%), Pulse (bpm)" class="w-full rounded-xl border border-slate-800 px-2 py-2 text-xs" />
                   <input id="formWeight" type="number" min="1" max="250" step="0.5" placeholder="Wt (kg)" title="Patient Weight in kg (for pediatric/adult dosing)" class="w-full rounded-xl border border-slate-800 px-2 py-2 text-xs font-mono" />
                 </div>
               </div>
@@ -664,6 +665,11 @@
           <div id="doctorStockAlertBanner" class="hidden p-3 rounded-xl bg-amber-950/90 border border-amber-600 text-amber-200 text-xs font-semibold flex items-center justify-between gap-2">
             <span id="doctorStockAlertText">⚠️ Low Pharmacy Stock Alert!</span>
             <button id="dismissDocStockAlertBtn" type="button" onclick="document.getElementById('doctorStockAlertBanner').classList.add('hidden')" class="text-amber-300 hover:text-white font-bold">✕</button>
+          </div>
+          <!-- OHC CARE (care_fe) Threshold-Based Critical Vitals Alert Banner -->
+          <div id="careCriticalVitalsBanner" class="hidden p-3 rounded-xl bg-rose-950 border border-rose-600 text-rose-200 text-xs font-semibold flex items-center justify-between gap-2">
+            <span id="careCriticalVitalsText">🚨 CRITICAL VITALS ALERT (WHO/AHA Threshold Exceeded)</span>
+            <button id="dismissCareVitalsBtn" type="button" onclick="document.getElementById('careCriticalVitalsBanner').classList.add('hidden')" class="text-rose-300 hover:text-white font-bold">✕</button>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1823,6 +1829,60 @@ function doPost(e){var f=DriveApp.getRootFolder().getFilesByName("zeroline_db.js
       document.getElementById("checkInForm").reset();
     }
 
+
+    // --- OHC CARE (care_fe) WHO/AHA Vitals Threshold Evaluator ---
+    function evaluateCareVitalsThreshold(vitalsStr) {
+      const raw = String(vitalsStr || "");
+      let level = "NORMAL"; // NORMAL, WARNING, CRITICAL
+      const reasons = [];
+
+      const bpMatch = raw.match(/(\d{2,3})\s*\/\s*(\d{2,3})/);
+      if (bpMatch) {
+        const sys = parseInt(bpMatch[1], 10);
+        const dia = parseInt(bpMatch[2], 10);
+        if (sys >= 160 || sys < 80 || dia >= 105) {
+          level = "CRITICAL";
+          reasons.push(`Critical BP ${sys}/${dia} mmHg`);
+        } else if (sys > 140 || sys < 90 || dia > 90) {
+          if (level !== "CRITICAL") level = "WARNING";
+          reasons.push(`Elevated BP ${sys}/${dia} mmHg`);
+        }
+      }
+
+      const tempMatch = raw.match(/(\d{2,3}(?:\.\d)?)\s*°?\s*[fF]/);
+      if (tempMatch) {
+        const tf = parseFloat(tempMatch[1]);
+        if (tf >= 101.5 || tf < 95.0) {
+          level = "CRITICAL";
+          reasons.push(`Critical Fever/Temp ${tf}°F`);
+        } else if (tf > 99.2) {
+          if (level !== "CRITICAL") level = "WARNING";
+          reasons.push(`Fever ${tf}°F`);
+        }
+      }
+
+      const spo2Match = raw.match(/(?:spo2\s*)?(\d{2,3})\s*%/i);
+      if (spo2Match) {
+        const sp = parseInt(spo2Match[1], 10);
+        if (sp < 90) {
+          level = "CRITICAL";
+          reasons.push(`Critical Hypoxia SpO2 ${sp}%`);
+        } else if (sp < 95) {
+          if (level !== "CRITICAL") level = "WARNING";
+          reasons.push(`Low SpO2 ${sp}%`);
+        }
+      }
+
+      let badgeHtml = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 text-[10px] font-bold">✅ Vitals Normal</span>`;
+      if (level === "CRITICAL") {
+        badgeHtml = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-rose-950 text-rose-200 border border-rose-600 text-[10px] font-bold">🚨 CRITICAL: ${escapeHtml(reasons.join(", "))}</span>`;
+      } else if (level === "WARNING") {
+        badgeHtml = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-700 text-[10px] font-bold">⚠️ WARNING: ${escapeHtml(reasons.join(", "))}</span>`;
+      }
+
+      return { level, reasons, badgeHtml };
+    }
+
     function submitCheckIn(e) {
       e.preventDefault();
       let cloudId = document.getElementById("formCloudId").value.trim();
@@ -1876,11 +1936,15 @@ function doPost(e){var f=DriveApp.getRootFolder().getFilesByName("zeroline_db.js
       const hasActiveInConsult = state.queue.some((q) => q.status === "IN_CONSULT");
       const newStatus = hasActiveInConsult ? "WAITING" : "IN_CONSULT";
 
+      const vitalsEval = evaluateCareVitalsThreshold(vitals);
+      const isAutoPriority = vitalsEval.level === "CRITICAL";
+
       const newQueueItem = {
         token: tokenStr,
         cloudId,
         complaint,
         vitals,
+        priority: isAutoPriority,
         status: newStatus,
         checkInTime: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
         diagnosis: "",
@@ -1891,7 +1955,13 @@ function doPost(e){var f=DriveApp.getRootFolder().getFilesByName("zeroline_db.js
         paid: false
       };
 
-      state.queue.push(newQueueItem);
+      if (isAutoPriority && newStatus === "WAITING") {
+        const inConsult = state.queue.filter((q) => q.status === "IN_CONSULT");
+        const rest = state.queue.filter((q) => q.status !== "IN_CONSULT");
+        state.queue = [...inConsult, newQueueItem, ...rest];
+      } else {
+        state.queue.push(newQueueItem);
+      }
       if (newStatus === "IN_CONSULT") {
         activeDoctorToken = tokenStr;
       }
@@ -1918,7 +1988,7 @@ function doPost(e){var f=DriveApp.getRootFolder().getFilesByName("zeroline_db.js
 
       const baseUrl = (window.location.origin && window.location.origin !== "null" ? window.location.origin + window.location.pathname : "https://preetamdalabhanjan-ship-it.github.io/zero-line-pro/");
       const liveTrackUrl = `${baseUrl}?track=${encodeURIComponent(item.token)}`;
-      return `*${state.saasConfig.brandName} — Live Token*\nHello ${p.name} (Cloud ID: ${p.cloudId})\nLive Token: *${item.token}* (${item.status.replace("_", " ")})\n${statusAdvice}\nLive Queue Tracker: ${liveTrackUrl}`;
+      return `*${state.saasConfig.brandName} — Live Token*\nHello ${p.name} (Cloud ID: ${escapeHtml(p.cloudId)})\nLive Token: *${item.token}* (${item.status.replace("_", " ")})\n${statusAdvice}\nLive Queue Tracker: ${liveTrackUrl}`;
     }
 
     function sendRealWhatsApp(tokenStr) {
@@ -2029,7 +2099,10 @@ function doPost(e){var f=DriveApp.getRootFolder().getFilesByName("zeroline_db.js
     function getRemoteCloudUrl() {
       const ep = ((state.saasConfig && state.saasConfig.cloudEndpoint) || "").trim().replace(/\/+$/, "");
       const room = ((state.saasConfig && state.saasConfig.cloudRoomId) || "clinic_main_01").trim().replace(/[^a-zA-Z0-9_-]/g, "_");
-      if (!ep) return "";
+      if (!ep || !ep.startsWith("https://")) return "";
+      if (ep.includes("script.google.com")) {
+        return `${ep}${ep.includes("?") ? "&" : "?"}room=${encodeURIComponent(room)}`;
+      }
       if (ep.includes("firebaseio.com") || ep.includes("firebasedatabase.app")) {
         return `${ep}/zeroline_${room}.json`;
       }
@@ -2121,7 +2194,7 @@ function doPost(e){var f=DriveApp.getRootFolder().getFilesByName("zeroline_db.js
       document.getElementById("waPreviewPhone").textContent = `WhatsApp → +91 ${p.phone}`;
       document.getElementById("waPreviewBox").innerHTML = `
         <div class="font-bold text-emerald-300">[${state.saasConfig.brandName}] Live Token Tracker</div>
-        <div>Hello <strong>${escapeHtml(p.name)}</strong> (Cloud ID: <span class="underline">${p.cloudId}</span>)</div>
+        <div>Hello <strong>${escapeHtml(p.name)}</strong> (Cloud ID: <span class="underline">${escapeHtml(p.cloudId)}</span>)</div>
         <div>Your Live Token: <strong>${item.token}</strong> | Status: <strong>${item.status.replace("_", " ")}</strong></div>
         <div class="text-amber-300 font-semibold">${departAlert}</div>
         <div class="flex items-center justify-between gap-2 pt-1">
@@ -2216,7 +2289,7 @@ function doPost(e){var f=DriveApp.getRootFolder().getFilesByName("zeroline_db.js
           </div>
           <div class="text-right">
             <span class="text-slate-400 block">Cloud Health ID</span>
-            <strong class="font-mono text-sm text-slate-200">${p.cloudId}</strong>
+            <strong class="font-mono text-sm text-slate-200">${escapeHtml(p.cloudId)}</strong>
             <span class="block text-[11px] text-slate-400">${escapeHtml(p.name)}</span>
           </div>
         </div>
@@ -2578,7 +2651,7 @@ function doPost(e){var f=DriveApp.getRootFolder().getFilesByName("zeroline_db.js
         <div class="p-3 rounded-xl bg-slate-950 border border-slate-800 flex justify-between">
           <div>
             <div><strong>Patient:</strong> ${escapeHtml(p.name)} (${p.age}y, ${p.blood})</div>
-            <div><strong>Unique Cloud ID:</strong> <span class="font-mono font-bold text-teal-300">${p.cloudId}</span></div>
+            <div><strong>Unique Cloud ID:</strong> <span class="font-mono font-bold text-teal-300">${escapeHtml(p.cloudId)}</span></div>
             <div><strong>Phone:</strong> ${escapeHtml(p.phone)}</div>
           </div>
           <div class="text-right">
@@ -2623,10 +2696,10 @@ function doPost(e){var f=DriveApp.getRootFolder().getFilesByName("zeroline_db.js
         <div class="text-slate-300"><strong>Advice:</strong> ${escapeHtml(item.notes || "—")}</div>
         <div class="p-2 rounded-lg bg-slate-950 border border-slate-800 text-[11px] font-mono text-teal-300 flex flex-wrap items-center justify-between gap-2">
           <span>🛡️ Vault Token: ${escapeHtml(item.encryptedPaymentVaultId || "PENDING-PAYMENT")}</span>
-          <span>Cloud ID: ${p.cloudId}</span>
+          <span>Cloud ID: ${escapeHtml(p.cloudId)}</span>
         </div>
         <div class="pt-3 border-t border-slate-800 flex items-end justify-between text-xs">
-          <div class="text-[11px] text-slate-400">Present Unique ID <strong>${p.cloudId}</strong> on your next visit.</div>
+          <div class="text-[11px] text-slate-400">Present Unique ID <strong>${escapeHtml(p.cloudId)}</strong> on your next visit.</div>
           <div class="text-right">
             <div class="font-bold text-slate-200">${escapeHtml((state.saasConfig && state.saasConfig.doctorSignature) || "Dr. Aarav Kulkarni (Reg. No. KMC-48291)")}</div>
             <div class="text-[10px] text-slate-400">Authorized Digital Prescription Signature</div>
@@ -2870,7 +2943,7 @@ function doPost(e){var f=DriveApp.getRootFolder().getFilesByName("zeroline_db.js
               <div class="font-bold text-slate-200">${escapeHtml(inq.clinicName)} <span class="text-teal-400 font-normal">(${escapeHtml(inq.plan)})</span></div>
               <div class="text-[11px] text-slate-400">${escapeHtml(inq.email)} • ${escapeHtml(inq.phone)}</div>
             </div>
-            <span class="text-[10px] font-mono text-slate-500">${inq.date}</span>
+            <span class="text-[10px] font-mono text-slate-500">${escapeHtml(inq.date)}</span>
           </div>
         `).join("");
     }
@@ -3746,9 +3819,12 @@ function doPost(e){var f=DriveApp.getRootFolder().getFilesByName("zeroline_db.js
               <div>
                 <div class="flex items-center gap-2">
                   <span class="font-bold text-sm text-slate-100">${escapeHtml(p.name)}</span>
-                  <span class="text-xs font-mono bg-slate-950 text-slate-300 px-2 py-0.5 rounded border border-slate-800">${p.cloudId}</span>
+                  <span class="text-xs font-mono bg-slate-950 text-slate-300 px-2 py-0.5 rounded border border-slate-800">${escapeHtml(p.cloudId)}</span>
                 </div>
-                <p class="text-xs text-slate-400">${escapeHtml(item.complaint)} • Checked in ${item.checkInTime}</p>
+                <div class="text-xs text-slate-400 flex flex-wrap items-center gap-2 mt-0.5">
+                  <span>${escapeHtml(item.complaint)} • <span class="font-mono text-slate-300">${escapeHtml(item.vitals)}</span> • ${item.checkInTime}</span>
+                  ${evaluateCareVitalsThreshold(item.vitals).badgeHtml}
+                </div>
                 <span class="inline-block mt-1 text-[11px] font-semibold ${isConsult ? 'text-blue-400' : 'text-amber-400'}">${statusText}</span>
               </div>
             </div>
@@ -3816,7 +3892,18 @@ function doPost(e){var f=DriveApp.getRootFolder().getFilesByName("zeroline_db.js
       document.getElementById("docEhrAllergies").textContent = patient.allergies || "None";
       document.getElementById("docEhrConditions").textContent = patient.conditions || "None";
       document.getElementById("docEhrComplaint").textContent = activeItem.complaint;
-      document.getElementById("docEhrVitals").textContent = activeItem.vitals;
+      const vEval = evaluateCareVitalsThreshold(activeItem.vitals);
+      document.getElementById("docEhrVitals").innerHTML = `${escapeHtml(activeItem.vitals)} ${vEval.badgeHtml}`;
+      const vBanner = document.getElementById("careCriticalVitalsBanner");
+      const vText = document.getElementById("careCriticalVitalsText");
+      if (vBanner && vText) {
+        if (vEval.level === "CRITICAL" || vEval.level === "WARNING") {
+          vBanner.classList.remove("hidden");
+          vText.textContent = `${vEval.level === "CRITICAL" ? "🚨 CRITICAL VITALS ALERT" : "⚠️ ABNORMAL VITALS WARNING"} (WHO/AHA Standard): ${patient.name} has ${vEval.reasons.join(", ")} (${activeItem.vitals}). Prioritize clinical stabilization!`;
+        } else {
+          vBanner.classList.add("hidden");
+        }
+      }
 
       const histContainer = document.getElementById("docEhrHistoryList");
       if (!patient.history || patient.history.length === 0) {
@@ -3888,7 +3975,7 @@ function doPost(e){var f=DriveApp.getRootFolder().getFilesByName("zeroline_db.js
               <div class="flex items-center gap-2">
                 <span class="px-2.5 py-1 rounded-lg font-mono font-bold text-xs ${item.paid ? 'bg-emerald-600 text-white' : 'bg-amber-500 text-black'}">${item.token}</span>
                 <span class="font-bold text-sm text-slate-100">${escapeHtml(p.name)}</span>
-                <span class="text-xs font-mono text-slate-400">(${p.cloudId})</span>
+                <span class="text-xs font-mono text-slate-400">(${escapeHtml(p.cloudId)})</span>
                 <span class="text-[11px] font-bold px-2 py-0.5 rounded-full ${item.paid ? 'bg-emerald-950 text-emerald-300 border border-emerald-800' : 'bg-rose-950 text-rose-300 border border-rose-800'}">
                   ${item.paid ? `✓ PAID • ${item.encryptedPaymentVaultId || 'ENC-SHA256-VERIFIED'}` : '⏳ AWAITING FRONT DESK PAYMENT'}
                 </span>
@@ -4123,7 +4210,7 @@ function doPost(e){var f=DriveApp.getRootFolder().getFilesByName("zeroline_db.js
                   <span class="px-2.5 py-1 rounded-lg font-mono font-bold text-xs ${isDone ? 'bg-emerald-600 text-white' : 'bg-teal-700 text-white'}">${item.token}</span>
                   <div>
                     <h3 class="font-bold text-sm text-slate-100">${escapeHtml(p.name)}</h3>
-                    <span class="text-[11px] font-mono text-slate-400">Cloud ID: ${p.cloudId} • +91 ${escapeHtml(p.phone)}</span>
+                    <span class="text-[11px] font-mono text-slate-400">Cloud ID: ${escapeHtml(p.cloudId)} • +91 ${escapeHtml(p.phone)}</span>
                   </div>
                 </div>
                 <span class="text-[11px] font-bold px-2.5 py-1 rounded-full ${statusBadgeClass}">
@@ -4199,11 +4286,11 @@ function doPost(e){var f=DriveApp.getRootFolder().getFilesByName("zeroline_db.js
         <div class="p-4 rounded-2xl border border-slate-800 bg-slate-900/80 space-y-2.5">
           <div class="flex items-start justify-between">
             <div>
-              <span class="inline-block font-mono font-bold text-xs bg-teal-900 text-white px-2.5 py-0.5 rounded">${p.cloudId}</span>
+              <span class="inline-block font-mono font-bold text-xs bg-teal-900 text-white px-2.5 py-0.5 rounded">${escapeHtml(p.cloudId)}</span>
               <h3 class="font-bold text-base text-slate-100 mt-1">${escapeHtml(p.name)}</h3>
               <p class="text-xs text-slate-400">${p.age} yrs • Blood: ${p.blood} • WhatsApp: +91 ${escapeHtml(p.phone)}</p>
             </div>
-            <button type="button" onclick="quickCheckInFromCloud('${p.cloudId}')" class="px-3 py-1.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-xs font-semibold">
+            <button type="button" onclick="quickCheckInFromCloud('${escapeHtml(p.cloudId)}')" class="px-3 py-1.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white text-xs font-semibold">
               Load at Front Desk
             </button>
           </div>
