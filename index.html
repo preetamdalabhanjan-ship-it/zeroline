@@ -4,12 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="theme-color" content="#090d16" />
-  <link rel="manifest" href="manifest.json" />
-  <link rel="icon" type="image/png" href="icon-192.png" />
-  <link rel="apple-touch-icon" href="icon-192.png" />
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-title" content="Zero-Line" />
   <title>Zero-Line Clinic Hub — Cloud EHR, Live Token & Pharmacy System</title>
   <meta name="description" content="Eliminate crowded clinic waiting rooms, paper record chaos, and prescription errors with Zero-Line Clinic Hub: Cloud Patient IDs, WhatsApp Tokens & 1-Stop Pharmacy." />
   <meta name="keywords" content="Clinic Management Software, Cloud EHR, Live WhatsApp Token Queue, Digital Prescription Software, Pharmacy Billing POS" />
@@ -103,6 +97,9 @@
       <div class="flex flex-wrap items-center gap-2">
         <button id="backToPaywallHeaderBtn" onclick="resetToStorefrontPreviewMode()" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 font-bold transition" title="Return to Main Paywall Page after live customer demo">
           <span>← Back to Paywall Page</span>
+        </button>
+        <button id="clearPaidDashboardBtn" type="button" onclick="clearPaidAndCompletedFromDashboard()" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 font-bold transition" title="Clear all paid and completed patients from the dashboard while preserving Today's Total Collected revenue">
+          <span>🧹 Clear Paid &amp; Completed</span>
         </button>
         <button id="planStatusBtn" onclick="openStorefrontGate()" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-teal-950/90 hover:bg-teal-900 text-teal-300 border border-teal-800 font-semibold transition">
           <span>Plan:</span>
@@ -578,7 +575,12 @@
                 <h2 class="text-base font-bold text-slate-100">Front Desk Cash & Billing Counter</h2>
                 <p class="text-xs text-slate-400">When the doctor taps "Consultation Complete", the final bill arrives here. Collect payment here so Pharmacy unlocks medicine handover.</p>
               </div>
-              <span class="text-xs font-semibold text-emerald-300 bg-emerald-950 px-2.5 py-1 rounded-lg border border-emerald-800">Front Desk Cashier</span>
+              <div class="flex flex-wrap items-center gap-2">
+                <button id="clearPaidFrontDeskBtn" type="button" onclick="clearPaidAndCompletedFromDashboard()" class="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold transition" title="Remove paid and completed bills from dashboard list while keeping Today's Total Collected revenue">
+                  🧹 Clear Paid Bills
+                </button>
+                <span class="text-xs font-semibold text-emerald-300 bg-emerald-950 px-2.5 py-1 rounded-lg border border-emerald-800">Front Desk Cashier</span>
+              </div>
             </div>
             <div id="frontDeskDailySettlementBar" class="p-3.5 rounded-xl bg-slate-950 border border-slate-800 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs"></div>
             <div id="frontDeskBillingList" class="space-y-3"></div>
@@ -784,7 +786,12 @@
             <h2 class="text-base font-bold text-slate-100">Zero-Line Pharmacy Packing & Verified Handover Counter</h2>
             <p class="text-xs text-slate-400">Pack the medicine bag as soon as the doctor finishes. Handover is strictly locked until Front Desk collects cash and marks the bill PAID.</p>
           </div>
-          <span class="text-xs font-semibold text-teal-300 bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800">Step 3 • Paid-Only Handover Gate</span>
+          <div class="flex flex-wrap items-center gap-2">
+            <button id="clearPaidPharmacyBtn" type="button" onclick="clearPaidAndCompletedFromDashboard()" class="px-2.5 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-bold transition" title="Clear paid and completed orders from dispatch view while keeping Today's Total Collected revenue">
+              🧹 Clear Paid Bills
+            </button>
+            <span class="text-xs font-semibold text-teal-300 bg-slate-900 px-2.5 py-1 rounded-lg border border-slate-800">Step 3 • Paid-Only Handover Gate</span>
+          </div>
         </div>
 
         <div id="pharmacyDispatchList" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
@@ -1514,11 +1521,30 @@ function doPost(e){var f=DriveApp.getRootFolder().getFilesByName("zeroline_db.js
       deferredInstallPrompt = e;
     });
 
-    // Real service worker (required for install). Needs https:// or localhost, not file://
-    if ('serviceWorker' in navigator && location.protocol !== 'file:') {
-      window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
-    }
-    window.addEventListener('appinstalled', () => { deferredInstallPrompt = null; });
+    (function injectPwaManifest() {
+      try {
+        const manifest = {
+          name: "Zero-Line Clinic Hub",
+          short_name: "ZeroLineHub",
+          start_url: ".",
+          display: "standalone",
+          background_color: "#000000",
+          theme_color: "#000000",
+          icons: [{
+            src: "data:image/svg+xml;base64," + btoa('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" rx="22" fill="#0f766e"/><text x="50" y="64" font-family="Arial" font-size="44" font-weight="bold" fill="#ffffff" text-anchor="middle">ZL</text></svg>'),
+            sizes: "192x192",
+            type: "image/svg+xml"
+          }]
+        };
+        const blob = new Blob([JSON.stringify(manifest)], { type: 'application/manifest+json' });
+        const link = document.createElement('link');
+        link.rel = 'manifest';
+        link.href = URL.createObjectURL(blob);
+        document.head.appendChild(link);
+      } catch (err) {
+        // Ignore in restricted sandboxed environments
+      }
+    })();
 
     // --- Standardized Medicine Formulary (Error-Free Dropdown) ---
     const DEFAULT_FORMULARY = [
@@ -1691,6 +1717,13 @@ function doPost(e){var f=DriveApp.getRootFolder().getFilesByName("zeroline_db.js
           }
           if (!parsed.inquiries) parsed.inquiries = [];
           if (!parsed.analytics) parsed.analytics = { tokensIssued: 0, consultsCompleted: 0, cashCollected: 0, inquiriesSent: 0 };
+          const todayIso = new Date().toISOString().slice(0, 10);
+          if (!parsed.archivedDailyStats || parsed.archivedDailyStats.date !== todayIso) {
+            parsed.archivedDailyStats = { date: todayIso, consultCollected: 0, medCollected: 0, clearedCount: 0 };
+          }
+          if (typeof parsed.dailyArchivedRevenue !== "number") {
+            parsed.dailyArchivedRevenue = (parsed.archivedDailyStats.consultCollected || 0) + (parsed.archivedDailyStats.medCollected || 0);
+          }
           return parsed;
         }
       } catch (e) {
@@ -1700,6 +1733,9 @@ function doPost(e){var f=DriveApp.getRootFolder().getFilesByName("zeroline_db.js
       fresh.saasConfig.adminPin = "2569";
       fresh.inquiries = [];
       fresh.analytics = { tokensIssued: 0, consultsCompleted: 0, cashCollected: 0, inquiriesSent: 0 };
+      const todayIso = new Date().toISOString().slice(0, 10);
+      fresh.archivedDailyStats = { date: todayIso, consultCollected: 0, medCollected: 0, clearedCount: 0 };
+      fresh.dailyArchivedRevenue = 0;
       return fresh;
     }
 
@@ -3751,15 +3787,11 @@ function doPost(e){var f=DriveApp.getRootFolder().getFilesByName("zeroline_db.js
       document.getElementById("installModal").classList.add("hidden");
     }
 
-    async function triggerNativePwaInstall() {
+    function triggerNativePwaInstall() {
       if (deferredInstallPrompt) {
         deferredInstallPrompt.prompt();
-        try { await deferredInstallPrompt.userChoice; } catch (e) {}
-        deferredInstallPrompt = null;
-      } else if (/iphone|ipad|ipod/i.test(navigator.userAgent)) {
-        showToast("iPhone/iPad: tap Share, then 'Add to Home Screen'.");
       } else {
-        showToast("Open the browser menu and tap 'Install app' / 'Add to Home Screen'. (Must be opened from the https link.)");
+        showToast("Use your browser's address bar 'Install App' or 'Add to Home Screen' menu to install natively.");
       }
       closeInstallModal();
     }
@@ -3915,24 +3947,68 @@ function doPost(e){var f=DriveApp.getRootFolder().getFilesByName("zeroline_db.js
       renderDraftRxList();
     }
 
+    function clearPaidAndCompletedFromDashboard() {
+      const todayIso = new Date().toISOString().slice(0, 10);
+      if (!state.archivedDailyStats || state.archivedDailyStats.date !== todayIso) {
+        state.archivedDailyStats = { date: todayIso, consultCollected: 0, medCollected: 0, clearedCount: 0 };
+      }
+
+      const toClear = state.queue.filter((q) => !(q.status === "WAITING" || q.status === "IN_CONSULT" || !q.paid));
+      if (toClear.length === 0) {
+        showToast("No paid or completed bills to clear — only active/unpaid patients are on the dashboard.");
+        return;
+      }
+
+      let addedConsult = 0;
+      let addedMed = 0;
+      let paidClearedCount = 0;
+
+      toClear.forEach((item) => {
+        if (item.paid) {
+          addedConsult += (item.consultFee || 500);
+          addedMed += (item.medicines || []).reduce((mSum, m) => mSum + (Number(m.price) || 0), 0);
+          paidClearedCount += 1;
+        }
+      });
+
+      state.archivedDailyStats = {
+        date: todayIso,
+        consultCollected: (state.archivedDailyStats.consultCollected || 0) + addedConsult,
+        medCollected: (state.archivedDailyStats.medCollected || 0) + addedMed,
+        clearedCount: (state.archivedDailyStats.clearedCount || 0) + paidClearedCount
+      };
+      state.dailyArchivedRevenue = state.archivedDailyStats.consultCollected + state.archivedDailyStats.medCollected;
+
+      state.queue = state.queue.filter((q) => q.status === "WAITING" || q.status === "IN_CONSULT" || !q.paid);
+      saveState();
+      renderAll();
+      const cur = (state.saasConfig && state.saasConfig.currency) || "₹";
+      const archivedSum = addedConsult + addedMed;
+      showToast(`🧹 Cleared ${toClear.length} paid/completed bill(s). ${cur}${archivedSum.toLocaleString()} preserved in Today's Total Collected!`);
+    }
+
     function renderFrontDeskBilling() {
       const container = document.getElementById("frontDeskBillingList");
       const tallyBar = document.getElementById("frontDeskDailySettlementBar");
       if (!container) return;
       const cur = state.saasConfig.currency;
       const items = state.queue.filter((q) => q.status === "PHARMACY_READY" || q.status === "COMPLETED");
+      const todayIso = new Date().toISOString().slice(0, 10);
+      const arch = (state.archivedDailyStats && state.archivedDailyStats.date === todayIso)
+        ? state.archivedDailyStats
+        : { date: todayIso, consultCollected: 0, medCollected: 0, clearedCount: 0 };
 
       if (tallyBar) {
         const paidItems = items.filter((i) => i.paid);
         const unpaidItems = items.filter((i) => !i.paid);
-        const consultCollected = paidItems.reduce((s, i) => s + (i.consultFee || 500), 0);
-        const medCollected = paidItems.reduce((s, i) => s + (i.medicines || []).reduce((mSum, m) => mSum + m.price, 0), 0);
+        const consultCollected = (arch.consultCollected || 0) + paidItems.reduce((s, i) => s + (i.consultFee || 500), 0);
+        const medCollected = (arch.medCollected || 0) + paidItems.reduce((s, i) => s + (i.medicines || []).reduce((mSum, m) => mSum + m.price, 0), 0);
         const totalCollected = consultCollected + medCollected;
         const pendingTotal = unpaidItems.reduce((s, i) => s + (i.consultFee || 500) + (i.medicines || []).reduce((mSum, m) => mSum + m.price, 0), 0);
 
         tallyBar.innerHTML = `
           <div>
-            <span class="text-slate-400 block">Today's Total Collected</span>
+            <span class="text-slate-400 block">Today's Total Collected ${arch.clearedCount > 0 ? `<span class="text-[10px] text-emerald-400 font-semibold">(${arch.clearedCount} archived)</span>` : ''}</span>
             <strong class="text-base font-extrabold font-mono text-emerald-400">${cur}${totalCollected.toLocaleString()}</strong>
           </div>
           <div>
